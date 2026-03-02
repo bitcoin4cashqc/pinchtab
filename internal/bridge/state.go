@@ -3,6 +3,7 @@ package bridge
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -66,33 +67,56 @@ func WasUncleanExit(profileDir string) bool {
 	return strings.Contains(prefs, `"exit_type":"Crashed"`) || strings.Contains(prefs, `"exit_type": "Crashed"`)
 }
 
+// sessionRestoreFiles are the specific files Chrome uses for tab restore.
+// Deleting only these is faster and less likely to hit locks than nuking
+// the entire Sessions directory.
+var sessionRestoreFiles = []string{
+	"Current Session",
+	"Current Tabs",
+	"Last Session",
+	"Last Tabs",
+}
+
 func ClearChromeSessions(profileDir string) {
 	sessionsDir := filepath.Join(profileDir, "Default", "Sessions")
 
-	// Retry with backoff on Windows where file locks may persist after Chrome exit
-	const maxRetries = 3
-	const retryDelayMs = 100
+	if _, err := os.Stat(sessionsDir); os.IsNotExist(err) {
+		return
+	}
 
-	var err error
-	for attempt := 0; attempt < maxRetries; attempt++ {
-		if attempt > 0 {
-			// Small delay before retry to allow file handles to be released
-			time.Sleep(time.Duration(retryDelayMs) * time.Millisecond)
-		}
-
-		err = os.RemoveAll(sessionsDir)
-		if err == nil {
-			slog.Info("cleared Chrome sessions dir (prevent tab restore hang)")
-			return
-		}
-
-		if attempt < maxRetries-1 {
-			slog.Debug("failed to clear Chrome sessions dir, retrying", "attempt", attempt+1, "err", err)
+	var failed []string
+	for _, name := range sessionRestoreFiles {
+		p := filepath.Join(sessionsDir, name)
+		if err := retryRemove(p, 3); err != nil {
+			failed = append(failed, name)
+			slog.Warn("failed to remove session file", "file", name, "err", err)
 		}
 	}
 
-	// Log final error if all retries failed
-	slog.Warn("failed to clear Chrome sessions dir after retries", "err", err)
+	if len(failed) == 0 {
+		slog.Info("cleared Chrome session restore files")
+	}
+}
+
+// retryRemove attempts to remove a single file with exponential backoff.
+// This handles Windows file lock errors where handles persist briefly
+// after Chrome exits.
+func retryRemove(path string, maxRetries int) error {
+	var err error
+	for attempt := 0; attempt < maxRetries; attempt++ {
+		if attempt > 0 {
+			time.Sleep(time.Duration(50*(1<<uint(attempt))) * time.Millisecond) // 100ms, 200ms, ...
+		}
+		err = os.Remove(path)
+		if err == nil || os.IsNotExist(err) {
+			return nil
+		}
+		if !isLockError(err) {
+			return err
+		}
+		slog.Debug("file locked, retrying remove", "path", filepath.Base(path), "attempt", attempt+1)
+	}
+	return fmt.Errorf("still locked after %d attempts: %w", maxRetries, err)
 }
 
 func (b *Bridge) SaveState() {
