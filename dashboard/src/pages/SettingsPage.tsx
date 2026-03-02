@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useAppStore } from "../stores/useAppStore";
 import { Button, Card } from "../components/atoms";
 import * as api from "../services/api";
@@ -7,6 +7,12 @@ import type { Settings } from "../types";
 export default function SettingsPage() {
   const { settings, serverInfo, setSettings, setServerInfo } = useAppStore();
   const [local, setLocal] = useState<Settings>(settings);
+
+  // Check if settings have changed
+  const hasChanges = useMemo(
+    () => JSON.stringify(local) !== JSON.stringify(settings),
+    [local, settings],
+  );
 
   // Load server info on mount (settings come from localStorage via store)
   useEffect(() => {
@@ -31,13 +37,19 @@ export default function SettingsPage() {
 
   return (
     <div className="flex flex-1 flex-col overflow-auto">
-      <div className="sticky top-0 z-10 flex items-center justify-end gap-2 border-b border-border-subtle bg-bg-surface px-4 py-2">
-        <Button variant="secondary" onClick={handleReset}>
-          Reset
-        </Button>
-        <Button variant="primary" onClick={handleSave}>
-          Apply Settings
-        </Button>
+      <div className="sticky top-0 z-10 border-b border-border-subtle bg-bg-surface px-4 py-2">
+        <div className="mx-auto flex w-full max-w-2xl items-center justify-end gap-2">
+          <Button
+            variant="secondary"
+            onClick={handleReset}
+            disabled={!hasChanges}
+          >
+            Reset
+          </Button>
+          <Button variant="primary" onClick={handleSave} disabled={!hasChanges}>
+            Apply Settings
+          </Button>
+        </div>
       </div>
 
       <div className="mx-auto w-full max-w-2xl space-y-6 p-6">

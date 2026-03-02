@@ -145,34 +145,36 @@ export default function ProfilesPage() {
       />
 
       <div className="flex-1 overflow-auto p-4">
-        {profilesLoading && profiles.length === 0 ? (
-          <div className="flex items-center justify-center py-16 text-text-muted">
-            Loading profiles...
-          </div>
-        ) : profiles.length === 0 ? (
-          <EmptyState
-            title="No profiles yet"
-            description="Click + New Profile to create one"
-            action={
-              <Button variant="primary" onClick={() => setShowCreate(true)}>
-                + New Profile
-              </Button>
-            }
-          />
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {profiles.map((p) => (
-              <ProfileCard
-                key={p.name}
-                profile={p}
-                instance={instanceByProfile.get(p.name)}
-                onLaunch={() => setShowLaunch(p.name)}
-                onStop={() => handleStop(p.name)}
-                onDetails={() => setShowDetails(p)}
-              />
-            ))}
-          </div>
-        )}
+        <div className="mx-auto max-w-2xl">
+          {profilesLoading && profiles.length === 0 ? (
+            <div className="flex items-center justify-center py-16 text-text-muted">
+              Loading profiles...
+            </div>
+          ) : profiles.length === 0 ? (
+            <EmptyState
+              title="No profiles yet"
+              description="Click + New Profile to create one"
+              action={
+                <Button variant="primary" onClick={() => setShowCreate(true)}>
+                  + New Profile
+                </Button>
+              }
+            />
+          ) : (
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+              {profiles.map((p) => (
+                <ProfileCard
+                  key={p.name}
+                  profile={p}
+                  instance={instanceByProfile.get(p.name)}
+                  onLaunch={() => setShowLaunch(p.name)}
+                  onStop={() => handleStop(p.name)}
+                  onDetails={() => setShowDetails(p)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Create Profile Modal */}
