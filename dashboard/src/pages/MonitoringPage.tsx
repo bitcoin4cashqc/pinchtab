@@ -48,8 +48,16 @@ export default function MonitoringPage() {
     // Guard against undefined/null instances
     if (!instances || !Array.isArray(instances)) return;
 
-    const runningInstances = instances.filter((i) => i?.status === "running");
-    const timestamp = Date.now();
+    // Only poll instances that have been running for at least 5 seconds
+    // (Chrome needs time to initialize after status becomes "running")
+    const now = Date.now();
+    const runningInstances = instances.filter((i) => {
+      if (i?.status !== "running") return false;
+      const startTime = i.startTime ? new Date(i.startTime).getTime() : 0;
+      const ageMs = now - startTime;
+      return ageMs > 5000; // 5 second grace period
+    });
+    const timestamp = now;
 
     try {
       // Always fetch server metrics
