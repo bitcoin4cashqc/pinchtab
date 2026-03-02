@@ -89,6 +89,13 @@ export interface Settings {
   screencast: ScreencastSettings;
   stealth: string; // light/full
   browser: BrowserSettings;
+  monitoring: MonitoringSettings;
+}
+/**
+ * MonitoringSettings controls dashboard monitoring features.
+ */
+export interface MonitoringSettings {
+  memoryMetrics: boolean; // Enable per-tab memory aggregation (can be heavy)
 }
 /**
  * ServerInfo contains health/status information.

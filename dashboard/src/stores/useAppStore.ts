@@ -68,6 +68,7 @@ const defaultSettings: Settings = {
   screencast: { fps: 1, quality: 30, maxWidth: 800 },
   stealth: "light",
   browser: { blockImages: false, blockMedia: false, noAnimations: false },
+  monitoring: { memoryMetrics: false },
 };
 
 export const useAppStore = create<AppState>((set) => ({

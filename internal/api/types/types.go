@@ -78,6 +78,12 @@ type Settings struct {
 	Screencast ScreencastSettings `json:"screencast"`
 	Stealth    string             `json:"stealth"` // light/full
 	Browser    BrowserSettings    `json:"browser"`
+	Monitoring MonitoringSettings `json:"monitoring"`
+}
+
+// MonitoringSettings controls dashboard monitoring features.
+type MonitoringSettings struct {
+	MemoryMetrics bool `json:"memoryMetrics"` // Enable per-tab memory aggregation (can be heavy)
 }
 
 // ServerInfo contains health/status information.

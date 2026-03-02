@@ -182,6 +182,39 @@ export default function SettingsPage() {
           </div>
         </Card>
 
+        {/* Monitoring */}
+        <Card className="p-4">
+          <h3 className="mb-4 text-sm font-semibold text-text-primary">
+            📈 Monitoring
+          </h3>
+          <div className="space-y-3">
+            <label className="flex items-center justify-between">
+              <div>
+                <span className="text-sm text-text-secondary">
+                  Memory Metrics
+                </span>
+                <p className="text-xs text-text-muted">
+                  Aggregate JS heap usage across tabs (can be heavy)
+                </p>
+              </div>
+              <input
+                type="checkbox"
+                checked={local.monitoring?.memoryMetrics ?? false}
+                onChange={(e) =>
+                  setLocal({
+                    ...local,
+                    monitoring: {
+                      ...local.monitoring,
+                      memoryMetrics: e.target.checked,
+                    },
+                  })
+                }
+                className="h-4 w-4"
+              />
+            </label>
+          </div>
+        </Card>
+
         {/* Server Info */}
         {serverInfo && (
           <Card className="p-4">

@@ -138,6 +138,7 @@ describe("useAppStore", () => {
         screencast: { fps: 5, quality: 50, maxWidth: 1024 },
         stealth: "strict" as const,
         browser: { blockImages: true, blockMedia: true, noAnimations: true },
+        monitoring: { memoryMetrics: true },
       };
       useAppStore.getState().setSettings(newSettings);
       expect(useAppStore.getState().settings).toEqual(newSettings);

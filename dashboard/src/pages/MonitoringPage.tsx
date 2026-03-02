@@ -20,6 +20,7 @@ export default function MonitoringPage() {
     addMemoryDataPoint,
     setCurrentTabs,
     setCurrentMemory,
+    settings,
   } = useAppStore();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -36,16 +37,18 @@ export default function MonitoringPage() {
     }
   };
 
-  // Fetch tabs and memory for all running instances
+  // Fetch tabs and optionally memory for all running instances
+  const memoryEnabled = settings.monitoring?.memoryMetrics ?? false;
+
   const fetchAllInstanceData = useCallback(async () => {
     const runningInstances = instances.filter((i) => i.status === "running");
     if (runningInstances.length === 0) return;
 
     try {
-      // Fetch tabs and metrics in parallel
+      // Fetch tabs always, metrics only if enabled
       const [allTabs, allMetrics] = await Promise.all([
         api.fetchAllTabs().catch(() => []),
-        api.fetchAllMetrics().catch(() => []),
+        memoryEnabled ? api.fetchAllMetrics().catch(() => []) : [],
       ]);
 
       const tabsArray = Array.isArray(allTabs) ? allTabs : [];
@@ -63,20 +66,24 @@ export default function MonitoringPage() {
         tabDataPoint[inst.id] = instTabs.length;
         tabsByInstance[inst.id] = instTabs;
 
-        // Find memory for this instance
-        const instMem = metricsArray.find((m) => m.instanceId === inst.id);
-        if (instMem) {
-          memDataPoint[inst.id] = instMem.jsHeapUsedMB;
-          memoryByInstance[inst.id] = instMem.jsHeapUsedMB;
+        // Find memory for this instance (if enabled)
+        if (memoryEnabled) {
+          const instMem = metricsArray.find((m) => m.instanceId === inst.id);
+          if (instMem) {
+            memDataPoint[inst.id] = instMem.jsHeapUsedMB;
+            memoryByInstance[inst.id] = instMem.jsHeapUsedMB;
+          }
         }
       }
 
       addChartDataPoint(
         tabDataPoint as Parameters<typeof addChartDataPoint>[0],
       );
-      addMemoryDataPoint(
-        memDataPoint as Parameters<typeof addMemoryDataPoint>[0],
-      );
+      if (memoryEnabled) {
+        addMemoryDataPoint(
+          memDataPoint as Parameters<typeof addMemoryDataPoint>[0],
+        );
+      }
       setCurrentTabs(tabsByInstance);
       setCurrentMemory(memoryByInstance);
     } catch (e) {
@@ -84,6 +91,7 @@ export default function MonitoringPage() {
     }
   }, [
     instances,
+    memoryEnabled,
     addChartDataPoint,
     addMemoryDataPoint,
     setCurrentTabs,
@@ -140,7 +148,7 @@ export default function MonitoringPage() {
       {/* Chart */}
       <TabsChart
         data={tabsChartData}
-        memoryData={memoryChartData}
+        memoryData={memoryEnabled ? memoryChartData : undefined}
         instances={runningInstances.map((i) => ({
           id: i.id,
           profileName: i.profileName,
@@ -164,7 +172,7 @@ export default function MonitoringPage() {
                 key={inst.id}
                 instance={inst}
                 tabCount={currentTabs[inst.id]?.length ?? 0}
-                memoryMB={currentMemory[inst.id]}
+                memoryMB={memoryEnabled ? currentMemory[inst.id] : undefined}
                 selected={selectedId === inst.id}
                 onClick={() => setSelectedId(inst.id)}
               />
