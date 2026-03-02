@@ -7,3 +7,4 @@ export { default as Modal } from "./Modal";
 export { default as Toolbar } from "./Toolbar";
 export { default as EmptyState } from "./EmptyState";
 export { default as ErrorBoundary } from "./ErrorBoundary";
+export { default as DebugPanel } from "./DebugPanel";

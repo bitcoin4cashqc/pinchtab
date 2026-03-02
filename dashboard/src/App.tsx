@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 import { useAppStore } from "./stores/useAppStore";
 import { NavBar } from "./components/molecules";
+import { DebugPanel } from "./components/atoms";
 import {
   MonitoringPage,
   ProfilesPage,
@@ -81,6 +82,7 @@ function AppContent() {
           <Route path="/settings" element={<SettingsPage />} />
         </Routes>
       </main>
+      <DebugPanel />
     </div>
   );
 }
