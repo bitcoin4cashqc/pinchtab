@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# doctor.sh - Verify development environment for pinchtab
-# Checks requirements for Go backend and React dashboard development
+# doctor.sh - Verify and setup development environment for pinchtab
+# Checks requirements and auto-installs what it can (hooks, dependencies)
+# Tells you what you need to install manually (Go, golangci-lint)
 
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
@@ -12,9 +13,10 @@ NC='\033[0m' # No Color
 
 CRITICAL_FAIL=0
 WARNINGS=0
+INSTALLED_SOMETHING=false
 
 echo -e "${BLUE}🩺 Pinchtab Doctor${NC}"
-echo -e "${BLUE}Checking development environment...${NC}"
+echo -e "${BLUE}Verifying and setting up development environment...${NC}"
 echo ""
 
 # Critical check
@@ -71,18 +73,31 @@ else
   check_critical "golangci-lint" "fail" "Required for pre-commit checks. Install: brew install golangci-lint or go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest"
 fi
 
-# Git hooks (warning)
+# Git hooks (auto-install if missing)
 if [ -f ".git/hooks/pre-commit" ]; then
   check_warning "Git hooks installed" "ok"
 else
-  check_warning "Git hooks" "fail" "Run: ./scripts/install-hooks.sh"
+  echo -e "${YELLOW}⚠️${NC}  Git hooks not installed"
+  echo -e "   ${BLUE}Installing git hooks...${NC}"
+  ./scripts/install-hooks.sh
+  echo -e "${GREEN}   ✅ Git hooks installed${NC}"
+  INSTALLED_SOMETHING=true
 fi
 
-# Go modules (info)
+# Go modules (auto-download if needed)
 if [ -f "go.mod" ]; then
-  check_warning "go.mod present" "ok"
+  # Check if dependencies are downloaded
+  if go list -m all &>/dev/null; then
+    check_warning "Go dependencies" "ok"
+  else
+    echo -e "${YELLOW}⚠️${NC}  Go dependencies not downloaded"
+    echo -e "   ${BLUE}Downloading dependencies...${NC}"
+    go mod download
+    echo -e "${GREEN}   ✅ Dependencies downloaded${NC}"
+    INSTALLED_SOMETHING=true
+  fi
 else
-  check_warning "go.mod" "fail" "Run: go mod download"
+  check_warning "go.mod" "fail" "go.mod not found"
 fi
 
 echo ""
@@ -128,18 +143,26 @@ echo -e "${BLUE}━━━ Summary ━━━${NC}"
 echo ""
 
 if [ $CRITICAL_FAIL -eq 0 ] && [ $WARNINGS -eq 0 ]; then
-  echo -e "${GREEN}✅ All checks passed! You're ready to develop.${NC}"
+  if [ "$INSTALLED_SOMETHING" = true ]; then
+    echo -e "${GREEN}✅ Setup complete! Auto-installed missing components.${NC}"
+  else
+    echo -e "${GREEN}✅ All checks passed! You're ready to develop.${NC}"
+  fi
+  echo ""
+  echo "Next steps:"
+  echo "  go build ./cmd/pinchtab     # Build pinchtab"
+  echo "  go test ./...               # Run tests"
   exit 0
 elif [ $CRITICAL_FAIL -eq 0 ]; then
+  if [ "$INSTALLED_SOMETHING" = true ]; then
+    echo -e "${GREEN}✅ Auto-installed what I could.${NC}"
+  fi
   echo -e "${YELLOW}⚠️  $WARNINGS warning(s). Development is possible but some tools are missing.${NC}"
   exit 0
 else
-  echo -e "${RED}❌ $CRITICAL_FAIL critical issue(s). Fix these before developing.${NC}"
+  echo -e "${RED}❌ $CRITICAL_FAIL critical issue(s). Install these manually:${NC}"
   [ $WARNINGS -gt 0 ] && echo -e "${YELLOW}⚠️  $WARNINGS warning(s).${NC}"
   echo ""
-  echo "Next steps:"
-  echo "  1. Fix critical issues above"
-  echo "  2. Run: ./doctor.sh to verify"
-  echo "  3. Run: ./setup.sh to complete setup"
+  echo "After installing, run ./doctor.sh again."
   exit 1
 fi

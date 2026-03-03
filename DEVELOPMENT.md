@@ -13,18 +13,15 @@
 git clone https://github.com/pinchtab/pinchtab.git
 cd pinchtab
 
-# 2. Check environment (optional but recommended)
+# 2. Setup (checks environment, installs hooks, downloads deps)
 ./doctor.sh
 
-# 3. Setup (installs git hooks, downloads deps)
-./setup.sh
-
-# 4. Build and run
+# 3. Build and run
 go build ./cmd/pinchtab
 ./pinchtab
 ```
 
-That's it! Git hooks are installed automatically and will run on every commit.
+That's it! `doctor.sh` verifies your environment and auto-installs what it can (git hooks, dependencies). Git hooks will run automatically on every commit.
 
 ## Detailed Setup
 
@@ -35,35 +32,26 @@ git clone https://github.com/pinchtab/pinchtab.git
 cd pinchtab
 ```
 
-### 2. Run setup script
-
-```bash
-./setup.sh
-```
-
-This will:
-- Install git hooks (gofmt + golangci-lint checks before commit)
-- Download Go dependencies
-- Verify your environment
-
-### 3. Verify environment (optional)
-
-Check your development environment anytime:
+### 2. Run doctor script
 
 ```bash
 ./doctor.sh
 ```
 
-This checks:
-- ✅ Go version (critical: 1.25+)
-- ✅ golangci-lint (critical: required for pre-commit)
-- ⚠️  Git hooks installed
-- ⚠️  Node.js / Bun (for dashboard development)
+This will:
+- **Check** Go 1.25+ and golangci-lint (tells you to install if missing)
+- **Auto-install** git hooks (gofmt + golangci-lint checks before commit)
+- **Auto-download** Go dependencies
+- **Check** Node.js / Bun for dashboard (optional, warns if missing)
 
-### 4. Install golangci-lint (required)
+### 3. Install missing tools (if needed)
 
-Required for pre-commit hooks:
+If doctor.sh finds missing critical tools, install them:
 
+**Go 1.25+:**
+- Download from https://go.dev/dl/
+
+**golangci-lint (required for pre-commit hooks):**
 ```bash
 # macOS/Linux
 brew install golangci-lint
@@ -72,7 +60,7 @@ brew install golangci-lint
 go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 ```
 
-The pre-commit hook will warn and allow commits without it, but CI will fail.
+After installing, run `./doctor.sh` again to verify.
 
 ## Before Committing
 
@@ -201,9 +189,8 @@ Validate docs: `./scripts/check-docs-json.sh`
 
 ```bash
 # Setup & Verification
-./doctor.sh                      # Check development environment
-./setup.sh                       # Setup dev environment (run once)
-./scripts/install-hooks.sh       # Re-install git hooks
+./doctor.sh                      # Check environment + auto-install hooks/deps
+./scripts/install-hooks.sh       # Manually re-install git hooks
 
 # Build & Run
 go build ./cmd/pinchtab          # Build pinchtab binary
