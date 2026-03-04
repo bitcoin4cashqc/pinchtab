@@ -145,8 +145,8 @@ func (c *CombinedMatcher) Find(ctx context.Context, query string, elements []Ele
 				el:    refToElem[ref],
 			}
 			if opts.Explain {
-				s.lexScore = ls
-				s.embScore = es
+				s.lexScore = lexW * ls
+				s.embScore = embW * es
 			}
 			candidates = append(candidates, s)
 		}
