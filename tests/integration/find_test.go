@@ -97,15 +97,13 @@ func TestFind_MissingQuery(t *testing.T) {
 	}
 }
 
-func TestFind_NoTab(t *testing.T) {
-	// Close current tab first to test error path.
-	closeCurrentTab(t)
-
+func TestFind_InvalidTab(t *testing.T) {
+	// Passing a nonexistent tabId should fail.
 	code, _ := httpPost(t, "/find", map[string]any{
 		"query": "anything",
+		"tabId": "tab_nonexistent_12345",
 	})
-	// Should fail — no tab to search.
 	if code == 200 {
-		t.Error("expected error when no tab exists, got 200")
+		t.Error("expected error for invalid tab, got 200")
 	}
 }
