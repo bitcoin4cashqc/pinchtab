@@ -44,6 +44,7 @@ TAB COMMANDS:
   pinchtab tabs              List open tabs
 
 MANAGEMENT COMMANDS:
+  pinchtab doctor        Setup & diagnostics (git hooks, dependencies)
   pinchtab health        Server health check
   pinchtab profiles      List available profiles
   pinchtab config init   Initialize config file
@@ -88,6 +89,7 @@ ENVIRONMENT:
 
 var cliCommands = map[string]bool{
 	// Management
+	"doctor":   true,
 	"health":   true,
 	"help":     true,
 	"config":   true,
@@ -152,6 +154,8 @@ func runCLI(cfg *config.RuntimeConfig) {
 
 	switch cmd {
 	// Management
+	case "doctor":
+		cliDoctor(client, base, token, args)
 	case "health":
 		cliHealth(client, base, token)
 	case "profiles":
