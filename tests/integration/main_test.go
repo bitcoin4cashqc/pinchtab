@@ -37,8 +37,9 @@ func TestMain(m *testing.M) {
 	}
 	serverURL = fmt.Sprintf("http://localhost:%s", port)
 
-	// Build the binary
-	build := exec.Command("go", "build", "-o", "/tmp/pinchtab-test", "./cmd/pinchtab/")
+	// Build the binary (use random temp file to avoid conflicts)
+	tmpBinary := fmt.Sprintf("/tmp/pinchtab-test-%d", os.Getpid())
+	build := exec.Command("go", "build", "-o", tmpBinary, "./cmd/pinchtab/")
 	build.Dir = findRepoRoot()
 	build.Stdout = os.Stdout
 	build.Stderr = os.Stderr
@@ -48,7 +49,7 @@ func TestMain(m *testing.M) {
 	}
 
 	// Start server
-	cmd := exec.Command("/tmp/pinchtab-test")
+	cmd := exec.Command(tmpBinary)
 
 	// Build environment for subprocess
 	// Start with a filtered set of inherited env vars, then add test-specific ones
@@ -136,6 +137,9 @@ func TestMain(m *testing.M) {
 	case <-time.After(10 * time.Second):
 		_ = cmd.Process.Kill()
 	}
+
+	// Cleanup temp binary
+	_ = os.Remove(tmpBinary)
 
 	os.Exit(code)
 }
