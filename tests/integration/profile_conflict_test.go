@@ -1,3 +1,5 @@
+//go:build integration
+
 package integration
 
 import (
@@ -24,7 +26,7 @@ func TestProfileConflictTwoInstancesSameProfile(t *testing.T) {
 
 	// Launch instance 1 with profile "conflict-test"
 	t.Log("Launching instance 1 with profile 'conflict-test'...")
-	inst1, err := launchInstance(baseURL, profileName, true)
+	inst1, err := launchInstance(serverURL, profileName, true)
 	if err != nil {
 		t.Fatalf("Failed to launch instance 1: %v", err)
 	}
@@ -33,7 +35,7 @@ func TestProfileConflictTwoInstancesSameProfile(t *testing.T) {
 	// Launch instance 2 with THE SAME profile "conflict-test"
 	// This should either fail immediately OR create an instance that fails to start
 	t.Log("Launching instance 2 with SAME profile 'conflict-test'...")
-	inst2, err := launchInstance(baseURL, profileName, true)
+	inst2, err := launchInstance(serverURL, profileName, true)
 	if err != nil {
 		t.Logf("✓ Instance 2 launch rejected (desired behavior): %v", err)
 		// This is actually good — orchestrator rejected the conflict
@@ -43,10 +45,10 @@ func TestProfileConflictTwoInstancesSameProfile(t *testing.T) {
 
 	// Wait for both instances to attempt startup
 	t.Log("Waiting for instance 1 to reach 'running' status...")
-	running1 := waitForInstanceRunning(t, baseURL, inst1.ID, 30*time.Second)
+	running1 := waitForInstanceRunning(t, serverURL, inst1.ID, 30*time.Second)
 
 	t.Log("Waiting for instance 2 to reach 'running' status...")
-	running2 := waitForInstanceRunning(t, baseURL, inst2.ID, 30*time.Second)
+	running2 := waitForInstanceRunning(t, serverURL, inst2.ID, 30*time.Second)
 
 	// Expected: instance 1 should run, instance 2 should fail
 	if running1 && !running2 {
@@ -62,7 +64,7 @@ func TestProfileConflictTwoInstancesSameProfile(t *testing.T) {
 	}
 
 	// Get final state
-	instances, err := getInstances(baseURL)
+	instances, err := getInstances(serverURL)
 	if err != nil {
 		t.Logf("Failed to get instances: %v", err)
 		return
@@ -78,6 +80,6 @@ func TestProfileConflictTwoInstancesSameProfile(t *testing.T) {
 	}
 
 	// Cleanup
-	_ = stopInstance(baseURL, inst1.ID)
-	_ = stopInstance(baseURL, inst2.ID)
+	_ = stopInstance(serverURL, inst1.ID)
+	_ = stopInstance(serverURL, inst2.ID)
 }

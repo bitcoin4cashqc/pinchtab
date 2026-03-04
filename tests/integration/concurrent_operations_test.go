@@ -1,3 +1,5 @@
+//go:build integration
+
 package integration
 
 import (
@@ -23,7 +25,7 @@ func TestConcurrentOperationsMultipleInstances(t *testing.T) {
 	instances := make([]*Instance, 3)
 	for i := 0; i < 3; i++ {
 		profileName := fmt.Sprintf("concurrent-test-%d", i+1)
-		inst, err := launchInstance(baseURL, profileName, true)
+		inst, err := launchInstance(serverURL, profileName, true)
 		if err != nil {
 			t.Fatalf("Failed to launch instance %d: %v", i+1, err)
 		}
@@ -39,7 +41,7 @@ func TestConcurrentOperationsMultipleInstances(t *testing.T) {
 		wg.Add(1)
 		go func(idx int) {
 			defer wg.Done()
-			running[idx] = waitForInstanceRunning(t, baseURL, instances[idx].ID, 45*time.Second)
+			running[idx] = waitForInstanceRunning(t, serverURL, instances[idx].ID, 45*time.Second)
 		}(i)
 	}
 	wg.Wait()
@@ -63,7 +65,7 @@ func TestConcurrentOperationsMultipleInstances(t *testing.T) {
 		"https://example.org",
 	}
 	for i, url := range urls {
-		if err := navigateViaOrchestrator(baseURL, url); err != nil {
+		if err := navigateViaOrchestrator(serverURL, url); err != nil {
 			t.Errorf("Navigation %d (%s) failed: %v", i+1, url, err)
 		} else {
 			t.Logf("  ✓ Navigation %d ok (%s)", i+1, url)
@@ -72,7 +74,7 @@ func TestConcurrentOperationsMultipleInstances(t *testing.T) {
 
 	// Verify all 3 instances still present
 	t.Log("Verifying all 3 instances still exist...")
-	all, err := getInstances(baseURL)
+	all, err := getInstances(serverURL)
 	if err != nil {
 		t.Fatalf("Failed to list instances: %v", err)
 	}
@@ -93,16 +95,16 @@ func TestConcurrentOperationsMultipleInstances(t *testing.T) {
 	// Cleanup
 	t.Log("Cleaning up...")
 	for _, inst := range instances {
-		_ = stopInstance(baseURL, inst.ID)
+		_ = stopInstance(serverURL, inst.ID)
 	}
 }
 
 // navigateViaOrchestrator calls POST /navigate on the orchestrator.
 // The simple strategy auto-allocates a running instance.
-func navigateViaOrchestrator(baseURL, url string) error {
+func navigateViaOrchestrator(serverURL, url string) error {
 	body, _ := json.Marshal(map[string]string{"url": url})
 	resp, err := http.Post(
-		fmt.Sprintf("%s/navigate", baseURL),
+		fmt.Sprintf("%s/navigate", serverURL),
 		"application/json",
 		bytes.NewReader(body),
 	)

@@ -1,3 +1,5 @@
+//go:build integration
+
 package integration
 
 import (
@@ -19,7 +21,7 @@ func TestMultipleInstancesWithDifferentProfiles(t *testing.T) {
 	requireOrchestrator(t)
 
 	// Clean up any existing instances first
-	resp, err := http.Get(fmt.Sprintf("%s/instances", baseURL))
+	resp, err := http.Get(fmt.Sprintf("%s/instances", serverURL))
 	if err != nil {
 		t.Fatalf("Failed to get instances: %v", err)
 	}
@@ -27,7 +29,7 @@ func TestMultipleInstancesWithDifferentProfiles(t *testing.T) {
 
 	// Launch instance 1 with profile "test-multi-1"
 	t.Log("Launching instance 1 with profile 'test-multi-1'...")
-	inst1, err := launchInstance(baseURL, "test-multi-1", true)
+	inst1, err := launchInstance(serverURL, "test-multi-1", true)
 	if err != nil {
 		t.Fatalf("Failed to launch instance 1: %v", err)
 	}
@@ -35,7 +37,7 @@ func TestMultipleInstancesWithDifferentProfiles(t *testing.T) {
 
 	// Launch instance 2 with profile "test-multi-2"
 	t.Log("Launching instance 2 with profile 'test-multi-2'...")
-	inst2, err := launchInstance(baseURL, "test-multi-2", true)
+	inst2, err := launchInstance(serverURL, "test-multi-2", true)
 	if err != nil {
 		t.Fatalf("Failed to launch instance 2: %v", err)
 	}
@@ -43,8 +45,8 @@ func TestMultipleInstancesWithDifferentProfiles(t *testing.T) {
 
 	// Wait for both instances to reach "running" status
 	t.Log("Waiting for both instances to reach 'running' status...")
-	running1 := waitForInstanceRunning(t, baseURL, inst1.ID, 30*time.Second)
-	running2 := waitForInstanceRunning(t, baseURL, inst2.ID, 30*time.Second)
+	running1 := waitForInstanceRunning(t, serverURL, inst1.ID, 30*time.Second)
+	running2 := waitForInstanceRunning(t, serverURL, inst2.ID, 30*time.Second)
 
 	if !running1 {
 		t.Errorf("Instance 1 (%s) never reached 'running' status (different profile issue)", inst1.ID)
@@ -61,7 +63,7 @@ func TestMultipleInstancesWithDifferentProfiles(t *testing.T) {
 	}
 
 	// Verify we can get both instances from /instances endpoint
-	instances, err := getInstances(baseURL)
+	instances, err := getInstances(serverURL)
 	if err != nil {
 		t.Fatalf("Failed to get instances list: %v", err)
 	}
@@ -82,8 +84,8 @@ func TestMultipleInstancesWithDifferentProfiles(t *testing.T) {
 	}
 
 	// Cleanup
-	_ = stopInstance(baseURL, inst1.ID)
-	_ = stopInstance(baseURL, inst2.ID)
+	_ = stopInstance(serverURL, inst1.ID)
+	_ = stopInstance(serverURL, inst2.ID)
 }
 
 type Instance struct {
@@ -94,7 +96,7 @@ type Instance struct {
 	Headless bool   `json:"headless"`
 }
 
-func launchInstance(baseURL, profileName string, headless bool) (*Instance, error) {
+func launchInstance(serverURL, profileName string, headless bool) (*Instance, error) {
 	reqBody := map[string]interface{}{
 		"name":     profileName,
 		"headless": headless,
@@ -102,7 +104,7 @@ func launchInstance(baseURL, profileName string, headless bool) (*Instance, erro
 	data, _ := json.Marshal(reqBody)
 
 	resp, err := http.Post(
-		fmt.Sprintf("%s/instances/launch", baseURL),
+		fmt.Sprintf("%s/instances/launch", serverURL),
 		"application/json",
 		bytes.NewReader(data),
 	)
@@ -124,7 +126,7 @@ func launchInstance(baseURL, profileName string, headless bool) (*Instance, erro
 	return &inst, nil
 }
 
-func waitForInstanceRunning(t *testing.T, baseURL, instID string, timeout time.Duration) bool {
+func waitForInstanceRunning(t *testing.T, serverURL, instID string, timeout time.Duration) bool {
 	deadline := time.Now().Add(timeout)
 	ticker := time.NewTicker(500 * time.Millisecond)
 	defer ticker.Stop()
@@ -132,7 +134,7 @@ func waitForInstanceRunning(t *testing.T, baseURL, instID string, timeout time.D
 	for {
 		select {
 		case <-ticker.C:
-			instances, err := getInstances(baseURL)
+			instances, err := getInstances(serverURL)
 			if err != nil {
 				t.Logf("Error getting instances: %v", err)
 				continue
@@ -161,8 +163,8 @@ func waitForInstanceRunning(t *testing.T, baseURL, instID string, timeout time.D
 	}
 }
 
-func getInstances(baseURL string) ([]map[string]interface{}, error) {
-	resp, err := http.Get(fmt.Sprintf("%s/instances", baseURL))
+func getInstances(serverURL string) ([]map[string]interface{}, error) {
+	resp, err := http.Get(fmt.Sprintf("%s/instances", serverURL))
 	if err != nil {
 		return nil, err
 	}
@@ -176,8 +178,8 @@ func getInstances(baseURL string) ([]map[string]interface{}, error) {
 	return instances, nil
 }
 
-func stopInstance(baseURL, instID string) error {
-	req, _ := http.NewRequest("POST", fmt.Sprintf("%s/instances/%s/stop", baseURL, instID), nil)
+func stopInstance(serverURL, instID string) error {
+	req, _ := http.NewRequest("POST", fmt.Sprintf("%s/instances/%s/stop", serverURL, instID), nil)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
