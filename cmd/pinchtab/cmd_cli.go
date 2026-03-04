@@ -22,26 +22,17 @@ MODES:
   pinchtab connect <name>  Get URL for a running profile instance
 
 MANAGEMENT COMMANDS:
-  pinchtab health                    Server health check
-  pinchtab profiles                  List available profiles
-  pinchtab instances                 List running instances
-  pinchtab tabs                      List open tabs (all instances)
-  pinchtab config init               Initialize config file
-  pinchtab config show               Display current configuration
-  pinchtab help                      Show this help
+  pinchtab health        Server health check
+  pinchtab profiles      List available profiles
+  pinchtab instances     List running instances
+  pinchtab tabs          List open tabs (all instances)
+  pinchtab config init   Initialize config file
+  pinchtab config show   Display current configuration
+  pinchtab help          Show this help
 
-ENVIRONMENT (CLIENT):
+ENVIRONMENT:
   PINCHTAB_URL    Server URL (default: http://127.0.0.1:9867)
   PINCHTAB_TOKEN  Auth token for API requests
-
-BROWSER AUTOMATION:
-  Use HTTP API directly or client libraries (Playwright, Puppeteer, Cypress)
-
-Examples:
-  pinchtab                              # Start server
-  pinchtab health                       # Check status
-  pinchtab connect work                 # Get instance URL
-  curl http://localhost:9867/snapshot   # HTTP API
 `, version)
 }
 
