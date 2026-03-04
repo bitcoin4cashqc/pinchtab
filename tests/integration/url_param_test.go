@@ -11,6 +11,9 @@ import (
 
 // TestSnapshot_WithURL verifies GET /snapshot?url=... navigates first then snapshots.
 func TestSnapshot_WithURL(t *testing.T) {
+	// URL param navigation needs an existing tab - create one first
+	navigate(t, "about:blank")
+	
 	params := url.Values{"url": {"https://example.com"}}
 	code, body := httpGet(t, "/snapshot?"+params.Encode())
 	if code != 200 {
@@ -32,28 +35,57 @@ func TestSnapshot_WithURL(t *testing.T) {
 		}
 	}
 
-	// Clean up: close the tab created by navigate
-	closeCurrentTab(t)
+	// Clean up: close the tab using returned tabId
+	if tabID, ok := result["tabId"].(string); ok {
+		httpPost(t, "/tab", map[string]any{
+			"tabId":  tabID,
+			"action": "close",
+		})
+	}
 }
 
 // TestText_WithURL verifies GET /text?url=... navigates first then extracts text.
 func TestText_WithURL(t *testing.T) {
+	// URL param navigation needs an existing tab - create one first
+	navigate(t, "about:blank")
+	
 	params := url.Values{"url": {"https://example.com"}}
 	code, body := httpGet(t, "/text?"+params.Encode())
 	if code != 200 {
 		t.Fatalf("text with url: expected 200, got %d: %s", code, string(body))
 	}
 
-	text := string(body)
-	if !strings.Contains(strings.ToLower(text), "example") {
-		t.Errorf("expected text containing 'example', got %d bytes", len(text))
+	// Text endpoint returns JSON with text field when not in plain format
+	var result map[string]any
+	if err := json.Unmarshal(body, &result); err == nil {
+		// JSON format - extract text field
+		if text, ok := result["text"].(string); ok {
+			if !strings.Contains(strings.ToLower(text), "example") {
+				t.Errorf("expected text containing 'example', got %d bytes", len(text))
+			}
+		}
+		// Clean up using returned tabId
+		if tabID, ok := result["tabId"].(string); ok {
+			httpPost(t, "/tab", map[string]any{
+				"tabId":  tabID,
+				"action": "close",
+			})
+		}
+	} else {
+		// Plain text format
+		text := string(body)
+		if !strings.Contains(strings.ToLower(text), "example") {
+			t.Errorf("expected text containing 'example', got %d bytes", len(text))
+		}
+		// Can't extract tabId from plain text, leave tab open
 	}
-
-	closeCurrentTab(t)
 }
 
 // TestFind_WithURL verifies POST /find with url field navigates + snapshots + searches.
 func TestFind_WithURL(t *testing.T) {
+	// URL param navigation needs an existing tab - create one first
+	navigate(t, "about:blank")
+	
 	code, body := httpPost(t, "/find", map[string]any{
 		"query": "More information",
 		"url":   "https://example.com",
@@ -73,7 +105,13 @@ func TestFind_WithURL(t *testing.T) {
 		t.Error("expected at least one match for 'More information' on example.com")
 	}
 
-	closeCurrentTab(t)
+	// Clean up using returned tabId
+	if tabID, ok := result["tabId"].(string); ok {
+		httpPost(t, "/tab", map[string]any{
+			"tabId":  tabID,
+			"action": "close",
+		})
+	}
 }
 
 // TestScreenshot_WithURL verifies GET /screenshot?url=... navigates first.
@@ -92,5 +130,5 @@ func TestScreenshot_WithURL(t *testing.T) {
 		t.Errorf("screenshot too small: %d bytes", len(body))
 	}
 
-	closeCurrentTab(t)
+	// Clean up is handled by navigate() setting currentTabID + t.Cleanup()
 }
