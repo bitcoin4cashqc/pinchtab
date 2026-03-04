@@ -94,6 +94,66 @@ func (bc *BridgeClient) CloseTab(ctx context.Context, port, tabID string) error 
 	return nil
 }
 
+// SnapshotTab calls GET /tabs/{tabID}/snapshot on the bridge to populate
+// the snapshot cache. The response body is discarded.
+func (bc *BridgeClient) SnapshotTab(ctx context.Context, port, tabID string) {
+	url := bridgeURL(port, "/tabs/"+tabID+"/snapshot")
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return
+	}
+	resp, err := bc.client.Do(req)
+	if err != nil {
+		return
+	}
+	_ = resp.Body.Close()
+}
+
+// ProxyWithTabID proxies a request to a bridge shorthand endpoint (e.g. /find),
+// injecting the tabId into the JSON request body so the bridge knows which tab
+// to operate on. Used for endpoints that don't support /tabs/{id}/... paths.
+func (bc *BridgeClient) ProxyWithTabID(w http.ResponseWriter, r *http.Request, port, tabID, path string) {
+	// Read original body and inject tabId.
+	var body map[string]any
+	if r.Body != nil {
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			body = map[string]any{}
+		}
+	} else {
+		body = map[string]any{}
+	}
+	body["tabId"] = tabID
+
+	encoded, err := json.Marshal(body)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("encode body: %s", err), http.StatusInternalServerError)
+		return
+	}
+
+	targetURL := bridgeURL(port, path)
+	proxyReq, err := http.NewRequestWithContext(r.Context(), r.Method, targetURL, strings.NewReader(string(encoded)))
+	if err != nil {
+		http.Error(w, fmt.Sprintf("proxy request: %s", err), http.StatusInternalServerError)
+		return
+	}
+	proxyReq.Header.Set("Content-Type", "application/json")
+
+	resp, err := bc.client.Do(proxyReq)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("proxy failed: %s", err), http.StatusBadGateway)
+		return
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	for key, values := range resp.Header {
+		for _, v := range values {
+			w.Header().Add(key, v)
+		}
+	}
+	w.WriteHeader(resp.StatusCode)
+	_, _ = io.Copy(w, resp.Body)
+}
+
 // ProxyToTab forwards an HTTP request to a specific bridge tab endpoint.
 // It builds the URL as http://localhost:{port}/tabs/{tabID}/{suffix} and
 // copies the request method, body, and headers.
