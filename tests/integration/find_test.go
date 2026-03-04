@@ -9,6 +9,9 @@ import (
 
 func TestFind_BasicMatch(t *testing.T) {
 	navigate(t, "https://example.com")
+	if currentTabID == "" {
+		t.Fatal("navigate did not return a tab id")
+	}
 
 	// /find requires a cached snapshot — take one first.
 	sCode, _ := httpGet(t, snapshotPath("/snapshot"))
@@ -16,9 +19,10 @@ func TestFind_BasicMatch(t *testing.T) {
 		t.Fatalf("snapshot prerequisite failed: %d", sCode)
 	}
 
-	// Don't pass tabId — shorthand /find uses the active tab.
+	// Pin to the exact tab created by navigate() to avoid cross-tab flakes.
 	code, body := httpPost(t, "/find", map[string]any{
 		"query": "Learn more",
+		"tabId": currentTabID,
 	})
 	if code != 200 {
 		t.Fatalf("expected 200, got %d: %s", code, string(body))
@@ -60,6 +64,9 @@ func TestFind_BasicMatch(t *testing.T) {
 
 func TestFind_NoMatch(t *testing.T) {
 	navigate(t, "https://example.com")
+	if currentTabID == "" {
+		t.Fatal("navigate did not return a tab id")
+	}
 
 	// /find requires a cached snapshot.
 	sCode, _ := httpGet(t, snapshotPath("/snapshot"))
@@ -69,6 +76,7 @@ func TestFind_NoMatch(t *testing.T) {
 
 	code, body := httpPost(t, "/find", map[string]any{
 		"query": "xyzzy_nonexistent_element_12345",
+		"tabId": currentTabID,
 	})
 	if code != 200 {
 		t.Fatalf("expected 200, got %d: %s", code, string(body))
