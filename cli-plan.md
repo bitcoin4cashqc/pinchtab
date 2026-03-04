@@ -388,3 +388,23 @@ pinchtab config validate
 **Commits (Phase 3):**
 - `c903c17` — Update README with new CLI model and config guide
 - `6f1d53e` — Add BREAKING_CHANGES.md with migration guide
+
+### Documentation Cleanup
+
+- [x] Simplify README.md
+  - Removed verbose config and API examples
+  - Added minimal quick start
+  - Reference to full docs
+- [x] Rewrite cli-quick-reference.md
+  - Removed all browser control examples
+  - Added management commands
+  - Added new config CLI commands
+  - Pointed to HTTP API for browser automation
+- [x] Update configuration.md
+  - Added CLI config management section
+  - Documented all config sections and keys
+  - Removed verbose examples (kept essentials)
+  - Simplified environment variable section
+
+**Commit:** `026d3a5`
+
