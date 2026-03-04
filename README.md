@@ -106,6 +106,55 @@ Read more in the [Core Concepts](https://pinchtab.com/docs/core-concepts) guide.
 
 ---
 
+
+## Configuration
+
+### Tab Limit Management
+
+Control what happens when Chrome hits the tab limit (default: 20 tabs):
+
+**Policy Options:**
+
+- **`reject`** (default) — Return 429 error when limit reached
+  - Safest option, requires manual cleanup
+  - Prevents unexpected tab closures
+  - Best for production environments
+
+- **`close_oldest`** — Auto-close oldest tab when limit reached
+  - Closes tab with earliest creation timestamp
+  - Useful for long-running sessions
+  - Automatic cleanup, no manual intervention needed
+
+- **`close_lru`** — Auto-close least-recently-used tab (future)
+  - Closes tab with earliest access timestamp
+  - Best for interactive use (keeps active tabs open)
+
+**Configuration:**
+
+```bash
+# Via environment variable
+TAB_LIMIT_POLICY=reject pinchtab         # Default
+TAB_LIMIT_POLICY=close_oldest pinchtab   # Auto-close oldest
+
+# Via config file
+pinchtab config set tabLimitPolicy close_oldest
+```
+
+**HTTP Response:**
+
+When `reject` policy is active and limit is reached:
+
+```json
+{
+  "code": "error",
+  "error": "tab limit reached (20/20)"
+}
+```
+
+HTTP Status: `429 Too Many Requests`
+
+---
+
 ## Why PinchTab?
 
 | Aspect | PinchTab |
