@@ -131,6 +131,25 @@ func (s *Strategy) handleNavigate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Strategy) handleSnapshot(w http.ResponseWriter, r *http.Request) {
+	// Check if URL provided - if so, create new tab
+	urlParam := r.URL.Query().Get("url")
+	if urlParam != "" {
+		port, err := s.ensureInstance()
+		if err != nil {
+			web.Error(w, http.StatusServiceUnavailable, fmt.Errorf("no instance available: %w", err))
+			return
+		}
+		tabID, err := s.bridge.CreateTab(r.Context(), port, urlParam)
+		if err != nil {
+			web.Error(w, http.StatusInternalServerError, fmt.Errorf("create tab: %w", err))
+			return
+		}
+		s.setCurrentTab(tabID)
+		s.bridge.ProxyToTab(w, r, port, tabID, "/snapshot")
+		return
+	}
+
+	// No URL - use current/first tab
 	tabID, port, err := s.currentOrFirst(r.Context())
 	if err != nil {
 		web.Error(w, http.StatusServiceUnavailable, err)
@@ -140,6 +159,25 @@ func (s *Strategy) handleSnapshot(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Strategy) handleScreenshot(w http.ResponseWriter, r *http.Request) {
+	// Check if URL provided - if so, create new tab
+	urlParam := r.URL.Query().Get("url")
+	if urlParam != "" {
+		port, err := s.ensureInstance()
+		if err != nil {
+			web.Error(w, http.StatusServiceUnavailable, fmt.Errorf("no instance available: %w", err))
+			return
+		}
+		tabID, err := s.bridge.CreateTab(r.Context(), port, urlParam)
+		if err != nil {
+			web.Error(w, http.StatusInternalServerError, fmt.Errorf("create tab: %w", err))
+			return
+		}
+		s.setCurrentTab(tabID)
+		s.bridge.ProxyToTab(w, r, port, tabID, "/screenshot")
+		return
+	}
+
+	// No URL - use current/first tab
 	tabID, port, err := s.currentOrFirst(r.Context())
 	if err != nil {
 		web.Error(w, http.StatusServiceUnavailable, err)
@@ -149,6 +187,25 @@ func (s *Strategy) handleScreenshot(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Strategy) handleText(w http.ResponseWriter, r *http.Request) {
+	// Check if URL provided - if so, create new tab
+	urlParam := r.URL.Query().Get("url")
+	if urlParam != "" {
+		port, err := s.ensureInstance()
+		if err != nil {
+			web.Error(w, http.StatusServiceUnavailable, fmt.Errorf("no instance available: %w", err))
+			return
+		}
+		tabID, err := s.bridge.CreateTab(r.Context(), port, urlParam)
+		if err != nil {
+			web.Error(w, http.StatusInternalServerError, fmt.Errorf("create tab: %w", err))
+			return
+		}
+		s.setCurrentTab(tabID)
+		s.bridge.ProxyToTab(w, r, port, tabID, "/text")
+		return
+	}
+
+	// No URL - use current/first tab
 	tabID, port, err := s.currentOrFirst(r.Context())
 	if err != nil {
 		web.Error(w, http.StatusServiceUnavailable, err)
@@ -185,6 +242,26 @@ func (s *Strategy) handleEvaluate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Strategy) handleFind(w http.ResponseWriter, r *http.Request) {
+	// Check if URL provided - if so, create new tab
+	urlParam := r.URL.Query().Get("url")
+	if urlParam != "" {
+		port, err := s.ensureInstance()
+		if err != nil {
+			web.Error(w, http.StatusServiceUnavailable, fmt.Errorf("no instance available: %w", err))
+			return
+		}
+		tabID, err := s.bridge.CreateTab(r.Context(), port, urlParam)
+		if err != nil {
+			web.Error(w, http.StatusInternalServerError, fmt.Errorf("create tab: %w", err))
+			return
+		}
+		s.setCurrentTab(tabID)
+		// Bridge HandleFind auto-snapshots and accepts tabId in body.
+		s.bridge.ProxyWithTabID(w, r, port, tabID, "/find")
+		return
+	}
+
+	// No URL - use current/first tab
 	tabID, port, err := s.currentOrFirst(r.Context())
 	if err != nil {
 		web.Error(w, http.StatusServiceUnavailable, err)
