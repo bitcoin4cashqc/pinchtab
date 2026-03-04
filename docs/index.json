@@ -20,6 +20,7 @@
     "architecture/chrome-lifecycle-and-orchestration.md",
     "architecture/dashboard-ui.md",
     "architecture/allocation-strategies.md",
+    "architecture/cdp-bridge.md",
     "architecture/building.md",
     "architecture/chart-porn.md"
   ],
