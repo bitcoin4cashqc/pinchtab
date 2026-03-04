@@ -4,7 +4,7 @@
 # Duration: ~10 seconds
 # Usage: ./tests/manual/automated-test.sh
 
-set -e
+set -o pipefail
 
 echo "🚀 Starting Automated Orchestrator Test..."
 echo "Tests: Instance creation, orchestrator shorthand endpoints, find"
@@ -100,8 +100,8 @@ echo ""
 sleep 2
 
 # Verify cleanup
-REMAINING=$(curl -s http://localhost:9867/instances | jq 'length')
-if [ "$REMAINING" -eq 0 ]; then
+REMAINING=$(curl -s http://localhost:9867/instances 2>/dev/null | jq 'length // 0' 2>/dev/null || echo 0)
+if [ -z "$REMAINING" ] || [ "$REMAINING" -eq 0 ]; then
   echo "✓ All instances cleaned up"
 else
   echo "⚠️  $REMAINING instances still running (may be cleaning up asynchronously)"

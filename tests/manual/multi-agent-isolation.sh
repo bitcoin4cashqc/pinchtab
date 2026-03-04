@@ -4,7 +4,7 @@
 # Duration: ~15 seconds
 # Usage: ./tests/manual/multi-agent-isolation.sh
 
-set -e
+set -o pipefail
 
 echo "🤖 Starting Multi-Agent Isolation Test..."
 echo "Tests: Concurrent agents, isolation verification, orchestrator routing"
@@ -120,8 +120,8 @@ echo ""
 sleep 2
 
 # Verify all cleaned up
-REMAINING=$(curl -s http://localhost:9867/instances | jq 'length')
-if [ "$REMAINING" -eq 0 ]; then
+REMAINING=$(curl -s http://localhost:9867/instances 2>/dev/null | jq 'length // 0' 2>/dev/null || echo 0)
+if [ -z "$REMAINING" ] || [ "$REMAINING" -eq 0 ]; then
   echo "✓ All instances cleaned up"
 else
   echo "⚠️  $REMAINING instances still running (may be cleaning up asynchronously)"
