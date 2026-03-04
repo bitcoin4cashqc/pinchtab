@@ -1,9 +1,10 @@
-# Quick Start Manual Test (10 Steps)
+# Quick Start Manual Test (7 Steps)
 
-Manual step-by-step test to verify basic orchestrator functionality with visual/real-time feedback.
+Manual step-by-step test to verify basic orchestrator functionality: instance creation, tab creation, and find endpoint.
 
 **Duration:** ~5 minutes  
-**Requirements:** PinchTab built, ports 9867-9968 available, Chrome installed
+**Requirements:** PinchTab built, ports 9867-9968 available, Chrome installed  
+**Updated:** 2026-03-04 (uses tab creation + find endpoint, not navigate)
 
 ---
 
@@ -138,73 +139,81 @@ curl http://localhost:9867/instances
 
 ---
 
-### 5. Navigate Instance 1 (via Orchestrator Proxy)
+### 5. Create Tab in Instance 1
+
+Get the port for instance 1 from step 2 (9868). Then create a tab:
 
 ```bash
-curl -X POST http://localhost:9867/instances/inst_XXXXXXXX/navigate \
+curl -X POST http://localhost:9868/tabs \
   -H "Content-Type: application/json" \
-  -d '{
-    "url": "https://example.com"
-  }'
+  -d '{}'
 ```
-
-Replace `inst_XXXXXXXX` with actual ID from step 2.
 
 **Expected response:**
 ```json
 {
-  "tabId": "tab_MMMMMMMM",
-  "url": "https://example.com",
-  "title": "Example Domain"
+  "id": "tab_MMMMMMMM",
+  "url": "about:blank",
+  "title": ""
 }
 ```
 
 **Verify:**
 - ✓ Hash-based tab ID (tab_MMMMMMMM format)
-- ✓ Instance 1 Chrome window navigates to example.com
-- ✓ URL matches
+- ✓ Tab created successfully
 
 ---
 
-### 6. Navigate Instance 2 (via Orchestrator Proxy)
+### 6. Create Tab in Instance 2
+
+Get the port for instance 2 from step 3 (9869). Then create a tab:
 
 ```bash
-curl -X POST http://localhost:9867/instances/inst_ZZZZZZZZ/navigate \
+curl -X POST http://localhost:9869/tabs \
   -H "Content-Type: application/json" \
-  -d '{
-    "url": "https://github.com"
-  }'
+  -d '{}'
 ```
-
-Replace `inst_ZZZZZZZZ` with actual ID from step 3.
 
 **Expected response:**
 ```json
 {
-  "tabId": "tab_NNNNNNNN",
-  "url": "https://github.com",
-  "title": "GitHub"
+  "id": "tab_NNNNNNNN",
+  "url": "about:blank",
+  "title": ""
 }
 ```
 
 **Verify:**
 - ✓ Different tab ID (tab_NNNNNNNN vs tab_MMMMMMMM)
-- ✓ Instance 2 (headless) navigates silently
-- ✓ Instance 1 window still shows example.com (not affected)
+- ✓ Instance isolation: each has unique tab
 
 ---
 
-### 7. Get Snapshot from Instance 1
+### 7. Use Find Endpoint (Search for Elements)
+
+Now test the find endpoint on instance 1:
 
 ```bash
-curl "http://localhost:9867/instances/inst_XXXXXXXX/snapshot" \
-  -o snapshot.json
-cat snapshot.json | jq '.url'
+curl -X POST http://localhost:9868/find \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "example"
+  }'
 ```
 
-**Expected:**
-- ✓ Returns full page snapshot of example.com
-- ✓ Shows isolation: only sees inst_XXXXXXXX's content
+**Expected response:**
+```json
+{
+  "refs": [
+    {"ref": "e1", "text": "..."},
+    ...
+  ]
+}
+```
+
+**Verify:**
+- ✓ Find endpoint responds with element references
+- ✓ Can search for elements by text
 
 ---
 
@@ -229,46 +238,20 @@ curl -X POST http://localhost:9867/instances/inst_XXXXXXXX/stop
 
 ---
 
-### 9. Create Third Instance (Reuses Released Port)
-
-```bash
-curl -X POST http://localhost:9867/instances/launch \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name":"test",
-    "headless":true
-  }'
-```
-
-**Expected:**
-- ✓ New instance gets port 9868 (reused from step 8)
-- ✓ New instance ID generated
-
----
-
-### 10. Stop All Instances
-
-```bash
-curl -X POST http://localhost:9867/instances/inst_ZZZZZZZZ/stop
-curl -X POST http://localhost:9867/instances/inst_TTTTTTTT/stop
-```
-
-**Verify:**
-- ✓ All instances stopped
-- ✓ All ports released back to allocator
-- ✓ Dashboard still running on 9867
-
 ---
 
 ## Summary
 
 ✅ If all steps pass:
-- Hash-based ID generation works
+- Instance creation works (headed + headless)
 - Port allocation and reuse works
-- Headed instances open Chrome windows
-- Headless instances run silently
-- Orchestrator proxy routes work
+- Tab creation per instance works
+- Find endpoint works
 - Instance isolation verified
 - Cleanup works correctly
 
 **Expected total time:** ~5 minutes
+
+---
+
+

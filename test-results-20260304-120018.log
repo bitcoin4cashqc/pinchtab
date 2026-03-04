@@ -1,0 +1,29 @@
+=== Manual Test Run ===
+Timestamp: Wed Mar  4 12:00:18 CET 2026
+Git branch: feat/allocation-strategies
+Latest commit: ff9d7a7 refactor(tests): organize manual tests by type (simple, complex scenarios)
+
+=== Test Results ===
+
+--- Test 1: Automated Test Script ---
+Command: ./tests/manual/automated-test.sh
+Start: Wed Mar  4 12:00:18 CET 2026
+zsh:16: command not found: timeout
+Status: ❌ FAIL
+End: Wed Mar  4 12:00:18 CET 2026
+
+--- Test 2: Stress Test (10 instances) ---
+Command: ./tests/manual/stress-test-10-instances.sh
+Start: Wed Mar  4 12:00:18 CET 2026
+zsh:30: command not found: timeout
+Status: ❌ FAIL
+End: Wed Mar  4 12:00:18 CET 2026
+
+--- Test 3: Multi-Agent Isolation Test ---
+Command: ./tests/manual/multi-agent-isolation.sh
+Start: Wed Mar  4 12:00:18 CET 2026
+zsh:44: command not found: timeout
+Status: ❌ FAIL
+End: Wed Mar  4 12:00:18 CET 2026
+
+=== Summary ===
