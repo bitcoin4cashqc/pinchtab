@@ -260,6 +260,17 @@ func jsonField(t *testing.T, data []byte, key string) string {
 
 func navigate(t *testing.T, url string) {
 	t.Helper()
+	// Close any previous tab to prevent accumulation
+	closeCurrentTab(t)
+
+	// Check if we're close to tab limit and close all to prevent accumulation
+	_, tabsBody := httpGet(t, "/tabs")
+	var tabs []any
+	if err := json.Unmarshal(tabsBody, &tabs); err == nil && len(tabs) > 15 {
+		t.Logf("warning: %d tabs open, closing all to prevent limit (20)", len(tabs))
+		closeAllTabs(t)
+	}
+
 	// Use retry logic for better stability
 	code, body := httpPostWithRetry(t, "/navigate", map[string]any{"url": url}, 2)
 	if code != 200 {
@@ -293,6 +304,27 @@ func closeCurrentTab(t *testing.T) {
 		"tabId":  currentTabID,
 		"action": "close",
 	})
+	currentTabID = ""
+}
+
+// closeAllTabs closes all open tabs (best-effort). Used to prevent tab limit accumulation.
+func closeAllTabs(t *testing.T) {
+	t.Helper()
+	// GET /tabs returns list of all tabs
+	_, body := httpGet(t, "/tabs")
+	var tabs []map[string]any
+	if err := json.Unmarshal(body, &tabs); err != nil {
+		return // Best effort
+	}
+
+	for _, tab := range tabs {
+		if id, ok := tab["id"].(string); ok {
+			_, _ = httpPost(t, "/tab", map[string]any{
+				"tabId":  id,
+				"action": "close",
+			})
+		}
+	}
 	currentTabID = ""
 }
 
