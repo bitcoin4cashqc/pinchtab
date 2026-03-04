@@ -17,9 +17,9 @@ func TestOrchestrator_HealthCheck(t *testing.T) {
 		t.Fatalf("expected 200, got %d", status)
 	}
 
-	mode := jsonField(t, body, "mode")
-	if mode != "dashboard" {
-		t.Fatalf("expected mode=dashboard, got %s", mode)
+	st := jsonField(t, body, "status")
+	if st != "ok" {
+		t.Fatalf("expected status=ok, got %s", st)
 	}
 }
 
