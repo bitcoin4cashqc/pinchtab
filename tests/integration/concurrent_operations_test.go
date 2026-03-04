@@ -16,8 +16,7 @@ func TestConcurrentOperationsMultipleInstances(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping integration test in short mode")
 	}
-
-	baseURL := "http://localhost:9867"
+	requireOrchestrator(t)
 
 	// Launch 3 instances with unique profiles
 	t.Log("Launching 3 instances with unique profiles...")

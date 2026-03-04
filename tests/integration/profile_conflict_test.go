@@ -18,8 +18,7 @@ func TestProfileConflictTwoInstancesSameProfile(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping integration test in short mode")
 	}
-
-	baseURL := "http://localhost:9867"
+	requireOrchestrator(t)
 
 	profileName := "conflict-test"
 

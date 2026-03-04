@@ -16,8 +16,7 @@ func TestMultipleInstancesWithDifferentProfiles(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping integration test in short mode")
 	}
-
-	baseURL := "http://localhost:9867"
+	requireOrchestrator(t)
 
 	// Clean up any existing instances first
 	resp, err := http.Get(fmt.Sprintf("%s/instances", baseURL))
