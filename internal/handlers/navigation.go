@@ -234,7 +234,9 @@ func (h *Handlers) HandleNavigate(w http.ResponseWriter, r *http.Request) {
 	_ = chromedp.Run(tCtx, chromedp.Location(&url))
 	title, _ := bridge.WaitForTitle(tCtx, titleWait)
 
-	web.JSON(w, 200, map[string]any{"tabId": resolvedTabID, "url": url, "title": title})
+	// Return the hash ID (req.TabID) not the CDP ID (resolvedTabID)
+	// External callers use hash IDs, CDP IDs are internal only
+	web.JSON(w, 200, map[string]any{"tabId": req.TabID, "url": url, "title": title})
 }
 
 // HandleTabNavigate navigates an existing tab identified by path ID.
