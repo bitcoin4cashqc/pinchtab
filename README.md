@@ -60,41 +60,37 @@ npm install -g pinchtab
 docker run -d -p 9867:9867 pinchtab/pinchtab
 ```
 
-### Use It
+### Quick Start
 
 **Terminal 1 — Start the server:**
 ```bash
 pinchtab
+# Server running on http://localhost:9867
 ```
 
-**Terminal 2 — Control the browser:**
+**Terminal 2 — Control via HTTP API:**
 ```bash
-# Navigate
-pinchtab nav https://example.com
+# Navigate to a page
+curl -X POST http://localhost:9867/navigate \
+  -d '{"url":"https://example.com"}' -H "Content-Type: application/json"
 
 # Get page structure
-pinchtab snap -i -c
+curl "http://localhost:9867/snapshot?filter=interactive&compact=true"
 
-# Click an element
-pinchtab click e5
-
-# Extract text
-pinchtab text
+# Interact with the page
+curl -X POST http://localhost:9867/action \
+  -d '{"kind":"click","ref":"e5"}' -H "Content-Type: application/json"
 ```
 
-Or use the HTTP API directly:
+**Management:**
 ```bash
-# Navigate (returns tabId)
-TAB=$(curl -s -X POST http://localhost:9867/instances \
-  -d '{"profile":"work"}' | jq -r '.id')
-
-# Get snapshot
-curl "http://localhost:9867/instances/$TAB/snapshot?filter=interactive"
-
-# Click element
-curl -X POST "http://localhost:9867/instances/$TAB/action" \
-  -d '{"kind":"click","ref":"e5"}'
+pinchtab health        # Server status
+pinchtab profiles      # List profiles
+pinchtab instances     # List running instances
+pinchtab config show   # View configuration
 ```
+
+See **[Full Documentation](https://pinchtab.com/docs)** for detailed guides and API reference.
 
 ---
 
