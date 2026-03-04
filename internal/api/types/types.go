@@ -94,9 +94,10 @@ type ServerInfo struct {
 	Profiles         int    `json:"profiles"`
 	Instances        int    `json:"instances"`
 	Agents           int    `json:"agents"`
-	Strategy         string `json:"strategy,omitempty"`
-	AllocationPolicy string `json:"allocationPolicy,omitempty"`
-	ConfigPath       string `json:"configPath,omitempty"`
+	Strategy          string `json:"strategy,omitempty"`
+	AllocationPolicy  string `json:"allocationPolicy,omitempty"`
+	TabEvictionPolicy string `json:"tabEvictionPolicy,omitempty"`
+	ConfigPath        string `json:"configPath,omitempty"`
 }
 
 // CreateProfileRequest is the request body for creating a profile.

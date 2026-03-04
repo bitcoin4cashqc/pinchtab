@@ -24,7 +24,7 @@ export default function SettingsPage() {
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <div className="sticky top-0 z-10 border-b border-border-subtle bg-bg-surface px-4 py-2">
-        <div className="mx-auto flex w-full max-w-5xl items-center justify-end gap-2">
+        <div className="flex w-full items-center justify-end gap-2">
           <Button
             variant="secondary"
             onClick={handleReset}
@@ -38,21 +38,21 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      <div className="mx-auto flex w-full max-w-5xl flex-1 overflow-hidden p-6 gap-8">
+      <div className="flex w-full flex-1 overflow-hidden p-6 gap-8">
         {/* Sidebar Info */}
-        <aside className="w-64 flex-shrink-0">
+        <aside className="w-64 shrink-0 overflow-y-auto">
           <ServerSummary />
         </aside>
 
         {/* Settings Content */}
-        <div className="flex-1 space-y-6 overflow-auto pr-2">
-          {/* Policies */}
+        <div className="flex-1 space-y-6 overflow-y-auto pr-2">
+          {/* Policies & Strategy */}
           {serverInfo && (
             <Card className="p-4">
               <h3 className="mb-4 text-sm font-semibold text-text-primary">
-                ⚖️ Policies
+                ⚖️ Policies & Strategy
               </h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-6">
                 <div className="space-y-1">
                   <label className="text-[10px] font-semibold text-text-muted uppercase tracking-tight">
                     Allocation Strategy
@@ -69,6 +69,14 @@ export default function SettingsPage() {
                   </label>
                   <div className="text-sm text-text-secondary italic">
                     {serverInfo.allocationPolicy || "fcfs"}
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-semibold text-text-muted uppercase tracking-tight">
+                    Tab Eviction
+                  </label>
+                  <div className="text-sm text-text-secondary italic">
+                    {serverInfo.tabEvictionPolicy || "reject"}
                   </div>
                 </div>
               </div>

@@ -5,6 +5,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/pinchtab/pinchtab/internal/config"
 )
@@ -165,6 +166,37 @@ func TestTabContext_AcceptsRegisteredHashID(t *testing.T) {
 	// resolvedID should be the raw CDP ID for internal consistency
 	if resolvedID != rawCDPID {
 		t.Errorf("resolvedID should be raw CDP ID, got %s", resolvedID)
+	}
+}
+
+func TestTabContext_EmptyID_UsesCurrentTrackedTab(t *testing.T) {
+	tm := NewTabManager(context.Background(), &config.RuntimeConfig{}, nil, nil)
+
+	olderCtx := context.WithValue(context.Background(), "tab", "older")
+	newerCtx := context.WithValue(context.Background(), "tab", "newer")
+	now := time.Now()
+
+	tm.tabs["tab_old1111"] = &TabEntry{
+		Ctx:      olderCtx,
+		CDPID:    "RAW_OLD",
+		LastUsed: now.Add(-1 * time.Minute),
+	}
+	tm.tabs["tab_new2222"] = &TabEntry{
+		Ctx:      newerCtx,
+		CDPID:    "RAW_NEW",
+		LastUsed: now,
+	}
+	tm.currentTab = "tab_new2222"
+
+	gotCtx, resolvedID, err := tm.TabContext("")
+	if err != nil {
+		t.Fatalf("TabContext(\"\") returned error: %v", err)
+	}
+	if gotCtx != newerCtx {
+		t.Fatalf("expected current tracked context, got different context")
+	}
+	if resolvedID != "RAW_NEW" {
+		t.Fatalf("expected resolved raw CDP id RAW_NEW, got %s", resolvedID)
 	}
 }
 

@@ -109,6 +109,7 @@ export interface ServerInfo {
   agents: number /* int */;
   strategy?: string;
   allocationPolicy?: string;
+  tabEvictionPolicy?: string;
   configPath?: string;
 }
 /**

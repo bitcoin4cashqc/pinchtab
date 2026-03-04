@@ -23,6 +23,7 @@ type TabManager struct {
 	tabs       map[string]*TabEntry
 	accessed   map[string]bool
 	snapshots  map[string]*RefCache
+	currentTab string
 	onTabSetup TabSetupFunc
 	mu         sync.RWMutex
 }
@@ -45,11 +46,43 @@ func NewTabManager(browserCtx context.Context, cfg *config.RuntimeConfig, idMgr 
 func (tm *TabManager) markAccessed(tabID string) {
 	tm.mu.Lock()
 	tm.accessed[tabID] = true
+	tm.currentTab = tabID
 	// Update LastUsed timestamp
 	if entry, ok := tm.tabs[tabID]; ok {
 		entry.LastUsed = time.Now()
 	}
 	tm.mu.Unlock()
+}
+
+// selectCurrentTrackedTab chooses the current tracked tab.
+// Preference order:
+// 1. Explicit currentTab pointer, if valid.
+// 2. Most recently used tracked tab.
+func (tm *TabManager) selectCurrentTrackedTab() (string, bool) {
+	tm.mu.RLock()
+	defer tm.mu.RUnlock()
+
+	if tm.currentTab != "" {
+		if entry, ok := tm.tabs[tm.currentTab]; ok && entry != nil && entry.Ctx != nil {
+			return tm.currentTab, true
+		}
+	}
+
+	var candidate string
+	var latest time.Time
+	for id, entry := range tm.tabs {
+		if entry == nil || entry.Ctx == nil {
+			continue
+		}
+		if candidate == "" || entry.LastUsed.After(latest) {
+			candidate = id
+			latest = entry.LastUsed
+		}
+	}
+	if candidate != "" {
+		return candidate, true
+	}
+	return "", false
 }
 
 // AccessedTabIDs returns the set of tab IDs that were accessed this session.
@@ -64,6 +97,12 @@ func (tm *TabManager) AccessedTabIDs() map[string]bool {
 }
 
 func (tm *TabManager) TabContext(tabID string) (context.Context, string, error) {
+	if tabID == "" {
+		if current, ok := tm.selectCurrentTrackedTab(); ok {
+			tabID = current
+		}
+	}
+
 	if tabID == "" {
 		// Auto-select first tab when no ID provided
 		targets, err := tm.ListTargets()
@@ -197,6 +236,7 @@ func (tm *TabManager) CreateTab(url string) (string, context.Context, context.Ca
 		LastUsed:  now,
 	}
 	tm.accessed[hashTabID] = true
+	tm.currentTab = hashTabID
 	tm.mu.Unlock()
 
 	return hashTabID, ctx, cancel, nil
@@ -239,6 +279,9 @@ func (tm *TabManager) CloseTab(tabID string) error {
 	tm.mu.Lock()
 	delete(tm.tabs, tabID)
 	delete(tm.snapshots, tabID)
+	if tm.currentTab == tabID {
+		tm.currentTab = ""
+	}
 	tm.mu.Unlock()
 
 	return nil
@@ -369,6 +412,7 @@ func (tm *TabManager) RegisterTab(tabID string, ctx context.Context) {
 		CreatedAt: now,
 		LastUsed:  now,
 	}
+	tm.currentTab = tabID
 }
 
 // RegisterHashTab registers a hash-based tab ID (e.g. "tab_XXXXXXXX") as an alias
@@ -385,6 +429,7 @@ func (tm *TabManager) RegisterHashTab(hashID, rawCDPID string, ctx context.Conte
 		CreatedAt: now,
 		LastUsed:  now,
 	}
+	tm.currentTab = hashID
 }
 
 // HashIDForCDP returns the hash-based tab ID for a given CDP target ID.

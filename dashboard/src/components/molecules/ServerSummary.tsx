@@ -22,16 +22,16 @@ export default function ServerSummary() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1 px-1">
-        <h2 className="text-xs font-bold tracking-widest text-text-muted uppercase">
-          Server Information
-        </h2>
-        <p className="text-[10px] text-text-muted italic">
-          Technical details for current session
-        </p>
-      </div>
-
       <Card className="p-3 flex flex-col gap-3 bg-bg-surface/50">
+        <div className="mb-1 border-b border-border-subtle pb-2">
+          <h2 className="text-[10px] font-bold tracking-widest text-text-muted uppercase">
+            Server Information
+          </h2>
+          <p className="text-[9px] text-text-muted italic opacity-70">
+            Technical details for current session
+          </p>
+        </div>
+
         <div className="flex flex-col gap-0.5">
           <label className="text-[10px] font-semibold text-text-muted uppercase tracking-tight">
             Version
@@ -49,30 +49,6 @@ export default function ServerSummary() {
             {uptimeStr(serverInfo.uptime)}
           </div>
         </div>
-
-        {serverInfo.strategy && (
-          <div className="flex flex-col gap-0.5">
-            <label className="text-[10px] font-semibold text-text-muted uppercase tracking-tight">
-              Strategy
-            </label>
-            <div className="flex items-center gap-1.5">
-              <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold text-primary uppercase">
-                {serverInfo.strategy}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {serverInfo.allocationPolicy && (
-          <div className="flex flex-col gap-0.5">
-            <label className="text-[10px] font-semibold text-text-muted uppercase tracking-tight">
-              Policy
-            </label>
-            <div className="text-sm text-text-secondary italic">
-              {serverInfo.allocationPolicy}
-            </div>
-          </div>
-        )}
 
         {serverInfo.configPath && (
           <div className="flex flex-col gap-0.5">
@@ -94,21 +70,6 @@ export default function ServerSummary() {
           </div>
         )}
       </Card>
-
-      <div className="p-3 grid grid-cols-2 gap-2 border-t border-border-subtle mt-2">
-        <div className="flex flex-col">
-          <span className="text-[10px] text-text-muted">Profiles</span>
-          <span className="text-sm font-semibold text-text-secondary">
-            {serverInfo.profiles}
-          </span>
-        </div>
-        <div className="flex flex-col">
-          <span className="text-[10px] text-text-muted">Instances</span>
-          <span className="text-sm font-semibold text-text-secondary">
-            {serverInfo.instances}
-          </span>
-        </div>
-      </div>
     </div>
   );
 }

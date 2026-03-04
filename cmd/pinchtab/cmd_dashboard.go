@@ -87,9 +87,10 @@ func runDashboard(cfg *config.RuntimeConfig) {
 			Profiles:         len(pList),
 			Instances:        len(orch.List()),
 			Agents:           len(orch.AllAgents()),
-			Strategy:         cfg.Strategy,
-			AllocationPolicy: cfg.AllocationPolicy,
-			ConfigPath:       cfg.ConfigPath,
+			Strategy:          cfg.Strategy,
+			AllocationPolicy:  cfg.AllocationPolicy,
+			TabEvictionPolicy: cfg.TabEvictionPolicy,
+			ConfigPath:        cfg.ConfigPath,
 		}
 		web.JSON(w, 200, info)
 	})
@@ -102,9 +103,10 @@ func runDashboard(cfg *config.RuntimeConfig) {
 			Profiles:         len(pList),
 			Instances:        len(orch.List()),
 			Agents:           len(orch.AllAgents()),
-			Strategy:         cfg.Strategy,
-			AllocationPolicy: cfg.AllocationPolicy,
-			ConfigPath:       cfg.ConfigPath,
+			Strategy:          cfg.Strategy,
+			AllocationPolicy:  cfg.AllocationPolicy,
+			TabEvictionPolicy: cfg.TabEvictionPolicy,
+			ConfigPath:        cfg.ConfigPath,
 		}
 		web.JSON(w, 200, info)
 	})

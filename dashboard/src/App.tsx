@@ -75,7 +75,7 @@ function AppContent() {
   return (
     <div className="flex h-screen flex-col bg-bg-app">
       <NavBar />
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-hidden">
         <Routes>
           <Route path="/" element={<Navigate to="/monitoring" replace />} />
           <Route path="/monitoring" element={<MonitoringPage />} />
