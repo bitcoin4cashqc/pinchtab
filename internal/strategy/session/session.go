@@ -372,7 +372,8 @@ func (s *Strategy) handleFind(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.touchSession(sess)
-	s.bridge.ProxyToTab(w, r, sess.Port, sess.TabID, "/find")
+	s.bridge.SnapshotTab(r.Context(), sess.Port, sess.TabID)
+	s.bridge.ProxyWithTabID(w, r, sess.Port, sess.TabID, "/find")
 }
 
 func (s *Strategy) handleGetCookies(w http.ResponseWriter, r *http.Request) {
