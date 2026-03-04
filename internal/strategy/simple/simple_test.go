@@ -97,6 +97,13 @@ func fakeBridge() *httptest.Server {
 		w.Header().Set("Content-Type", "application/pdf")
 		_, _ = w.Write([]byte("fake-pdf"))
 	})
+	mux.HandleFunc("POST /find", func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"matches": []map[string]any{
+				{"ref": "e1", "score": 0.9},
+			},
+		})
+	})
 
 	return httptest.NewServer(mux)
 }
@@ -293,5 +300,99 @@ func TestSimple_NavigateGet(t *testing.T) {
 
 	if rec.Code != 200 {
 		t.Fatalf("expected 200, got %d: %s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestSimple_Snapshot_WithURL_CreatesTab(t *testing.T) {
+	s, _ := setupStrategy(t)
+	mux := serveMux(s)
+
+	req := httptest.NewRequest("GET", "/snapshot?url=https://example.com", nil)
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != 200 {
+		t.Errorf("expected 200, got %d: %s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestSimple_Text_WithURL_CreatesTab(t *testing.T) {
+	s, _ := setupStrategy(t)
+	mux := serveMux(s)
+
+	req := httptest.NewRequest("GET", "/text?url=https://example.com", nil)
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != 200 {
+		t.Errorf("expected 200, got %d: %s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestSimple_Screenshot_WithURL_CreatesTab(t *testing.T) {
+	s, _ := setupStrategy(t)
+	mux := serveMux(s)
+
+	req := httptest.NewRequest("GET", "/screenshot?url=https://example.com", nil)
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != 200 {
+		t.Errorf("expected 200, got %d: %s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestSimple_Find_WithURL_CreatesTab(t *testing.T) {
+	s, _ := setupStrategy(t)
+	mux := serveMux(s)
+
+	body := strings.NewReader(`{"query":"search"}`)
+	req := httptest.NewRequest("POST", "/find?url=https://example.com", body)
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != 200 {
+		t.Errorf("expected 200, got %d: %s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestSimple_Text_NoURL_UsesCurrentTab(t *testing.T) {
+	s, _ := setupStrategy(t)
+	mux := serveMux(s)
+
+	// First create a tab via navigate
+	navReq := httptest.NewRequest("POST", "/navigate", strings.NewReader(`{"url":"https://example.com"}`))
+	navReq.Header.Set("Content-Type", "application/json")
+	navRec := httptest.NewRecorder()
+	mux.ServeHTTP(navRec, navReq)
+
+	if navRec.Code != 200 {
+		t.Fatalf("navigate failed: %d", navRec.Code)
+	}
+
+	// Now text without URL should use the current tab
+	req := httptest.NewRequest("GET", "/text", nil)
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != 200 {
+		t.Errorf("expected 200, got %d: %s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestSimple_Snapshot_NoURL_NoTab_Fails(t *testing.T) {
+	launcher := &mockLauncher{}
+	mgr := instance.NewManager(launcher, instance.NewBridgeClient(), nil)
+	s := simple.New(mgr)
+	mux := serveMux(s)
+
+	// No navigate, no URL param -> should fail
+	req := httptest.NewRequest("GET", "/snapshot", nil)
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code == 200 {
+		t.Error("expected error when no tabs and no URL")
 	}
 }
