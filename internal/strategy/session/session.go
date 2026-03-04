@@ -372,7 +372,7 @@ func (s *Strategy) handleFind(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.touchSession(sess)
-	s.bridge.SnapshotTab(r.Context(), sess.Port, sess.TabID)
+	// Bridge HandleFind auto-snapshots and accepts tabId in body.
 	s.bridge.ProxyWithTabID(w, r, sess.Port, sess.TabID, "/find")
 }
 

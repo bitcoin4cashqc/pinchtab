@@ -23,6 +23,8 @@ func (h *Handlers) HandleText(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tabID := r.URL.Query().Get("tabId")
+	navURL := r.URL.Query().Get("url")
+	waitFor := r.URL.Query().Get("waitFor")
 	mode := r.URL.Query().Get("mode")
 	format := strings.ToLower(strings.TrimSpace(r.URL.Query().Get("format")))
 	maxChars := -1
@@ -38,9 +40,14 @@ func (h *Handlers) HandleText(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tCtx, tCancel := context.WithTimeout(ctx, h.Config.ActionTimeout)
+	tCtx, tCancel := context.WithTimeout(ctx, h.Config.NavigateTimeout+h.Config.ActionTimeout)
 	defer tCancel()
 	go web.CancelOnClientDone(r.Context(), tCancel)
+
+	if err := h.ensureNavigated(tCtx, navURL, waitFor, WaitDOM); err != nil {
+		web.Error(w, 500, fmt.Errorf("navigate: %w", err))
+		return
+	}
 
 	var text string
 	if mode == "raw" {

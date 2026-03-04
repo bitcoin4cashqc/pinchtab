@@ -64,6 +64,8 @@ func (h *Handlers) HandleSnapshot(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tabID := r.URL.Query().Get("tabId")
+	navURL := r.URL.Query().Get("url")
+	waitFor := r.URL.Query().Get("waitFor")
 	filter := r.URL.Query().Get("filter")
 	doDiff := r.URL.Query().Get("diff") == "true"
 	format := r.URL.Query().Get("format")
@@ -92,9 +94,14 @@ func (h *Handlers) HandleSnapshot(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tCtx, tCancel := context.WithTimeout(ctx, h.Config.ActionTimeout)
+	tCtx, tCancel := context.WithTimeout(ctx, h.Config.NavigateTimeout+h.Config.ActionTimeout)
 	defer tCancel()
 	go web.CancelOnClientDone(r.Context(), tCancel)
+
+	if err := h.ensureNavigated(tCtx, navURL, waitFor, WaitDOM); err != nil {
+		web.Error(w, 500, fmt.Errorf("navigate: %w", err))
+		return
+	}
 
 	if reqNoAnim && !h.Config.NoAnimations {
 		bridge.DisableAnimationsOnce(tCtx)

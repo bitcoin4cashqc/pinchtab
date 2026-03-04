@@ -189,9 +189,7 @@ func (s *Strategy) handleFind(w http.ResponseWriter, r *http.Request) {
 		web.Error(w, http.StatusServiceUnavailable, err)
 		return
 	}
-	// Snapshot first so /find has fresh data to search.
-	s.bridge.SnapshotTab(r.Context(), port, tabID)
-	// Bridge exposes POST /find (not /tabs/{id}/find), pass tabId in body.
+	// Bridge HandleFind auto-snapshots and accepts tabId in body.
 	s.bridge.ProxyWithTabID(w, r, port, tabID, "/find")
 }
 
@@ -322,7 +320,6 @@ func (s *Strategy) handleTabFind(w http.ResponseWriter, r *http.Request) {
 		web.Error(w, http.StatusNotFound, err)
 		return
 	}
-	s.bridge.SnapshotTab(r.Context(), port, tabID)
 	s.bridge.ProxyWithTabID(w, r, port, tabID, "/find")
 }
 

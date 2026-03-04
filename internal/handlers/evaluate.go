@@ -19,6 +19,8 @@ import (
 func (h *Handlers) HandleEvaluate(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		TabID      string `json:"tabId"`
+		URL        string `json:"url,omitempty"`
+		WaitFor    string `json:"waitFor,omitempty"`
 		Expression string `json:"expression"`
 	}
 	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, maxBodySize)).Decode(&req); err != nil {
@@ -36,9 +38,14 @@ func (h *Handlers) HandleEvaluate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tCtx, tCancel := context.WithTimeout(ctx, h.Config.ActionTimeout)
+	tCtx, tCancel := context.WithTimeout(ctx, h.Config.NavigateTimeout+h.Config.ActionTimeout)
 	defer tCancel()
 	go web.CancelOnClientDone(r.Context(), tCancel)
+
+	if err := h.ensureNavigated(tCtx, req.URL, req.WaitFor, WaitDOM); err != nil {
+		web.Error(w, 500, fmt.Errorf("navigate: %w", err))
+		return
+	}
 
 	var result any
 	if err := chromedp.Run(tCtx, chromedp.Evaluate(req.Expression, &result)); err != nil {
