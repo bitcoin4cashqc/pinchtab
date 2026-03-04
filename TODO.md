@@ -82,11 +82,12 @@ Thin HTTP wrappers in `cmd/pinchtab/cmd_cli.go`. Each hits `PINCHTAB_URL`.
 - [ ] Integration: `pinchtab snap https://example.com` CLI end-to-end
 
 ## Implementation Order
-1. Docs (cdp-bridge.md) — design decisions documented first
-2. Bridge handler `ensureNavigated` + `url` param on all read handlers
-3. Move `/find` snapshot logic into bridge handler
-4. CLI commands
-5. Tests throughout
+1. Bridge handler `ensureNavigated` + `url` param on all read handlers
+2. Move `/find` snapshot logic into bridge handler
+3. CLI commands
+4. Docs part 1: `cdp-bridge.md` — CDP wait strategies, smart defaults, `url` param pattern
+5. Docs part 2: CLI reference — all commands, flags, examples
+6. Tests
 
 ## Notes
 - `quick` command dropped — `snap <url>` is the same thing
