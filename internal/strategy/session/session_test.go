@@ -280,17 +280,7 @@ func TestSession_Browse_AutoCreatesSession(t *testing.T) {
 	}
 }
 
-func TestSession_ListInstances(t *testing.T) {
-	_, mux := setup(t)
-
-	req := httptest.NewRequest("GET", "/instances", nil)
-	rec := httptest.NewRecorder()
-	mux.ServeHTTP(rec, req)
-
-	if rec.Code != 200 {
-		t.Errorf("expected 200, got %d", rec.Code)
-	}
-}
+// GET /instances is now handled by the orchestrator, not the strategy.
 
 func TestSession_ListTabs(t *testing.T) {
 	_, mux := setup(t)

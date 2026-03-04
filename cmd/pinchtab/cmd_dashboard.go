@@ -67,7 +67,13 @@ func runDashboard(cfg *config.RuntimeConfig) {
 	mux := http.NewServeMux()
 
 	dash.RegisterHandlers(mux)
-	orch.RegisterHandlers(mux)
+	// When a strategy is configured, skip orchestrator's tab proxy routes
+	// to avoid conflicts — the strategy registers those itself.
+	if cfg.Strategy != "" {
+		orch.RegisterHandlersWithStrategy(mux)
+	} else {
+		orch.RegisterHandlers(mux)
+	}
 	profMgr.RegisterHandlers(mux)
 
 	// Root returns health check (API-first design)

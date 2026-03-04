@@ -6,7 +6,22 @@ import (
 	"github.com/pinchtab/pinchtab/internal/web"
 )
 
+// RegisterHandlers registers all orchestrator endpoints on the mux.
+// When a strategy is active, call RegisterHandlersWithStrategy instead
+// to skip tab proxy routes (the strategy registers those itself).
 func (o *Orchestrator) RegisterHandlers(mux *http.ServeMux) {
+	o.registerCoreHandlers(mux)
+	o.RegisterTabProxyHandlers(mux)
+}
+
+// RegisterHandlersWithStrategy registers only instance/profile management
+// endpoints, skipping tab proxy routes that the strategy will handle.
+func (o *Orchestrator) RegisterHandlersWithStrategy(mux *http.ServeMux) {
+	o.registerCoreHandlers(mux)
+}
+
+// registerCoreHandlers registers instance and profile management endpoints.
+func (o *Orchestrator) registerCoreHandlers(mux *http.ServeMux) {
 	// Profile management
 	mux.HandleFunc("POST /profiles/{id}/start", o.handleStartByID)
 	mux.HandleFunc("POST /profiles/{id}/stop", o.handleStopByID)
@@ -27,7 +42,11 @@ func (o *Orchestrator) RegisterHandlers(mux *http.ServeMux) {
 	mux.HandleFunc("POST /instances/{id}/tabs/open", o.handleInstanceTabOpen)
 	mux.HandleFunc("POST /instances/{id}/tab", o.proxyToInstance)
 	mux.HandleFunc("GET /instances/{id}/screencast", o.proxyToInstance)
+}
 
+// RegisterTabProxyHandlers registers tab proxy routes (POST /tabs/{id}/*).
+// These are skipped when a strategy is active since the strategy handles them.
+func (o *Orchestrator) RegisterTabProxyHandlers(mux *http.ServeMux) {
 	// Tab operations - custom handlers
 	mux.HandleFunc("POST /tabs/{id}/close", o.handleTabClose)
 

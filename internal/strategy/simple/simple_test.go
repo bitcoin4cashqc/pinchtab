@@ -244,18 +244,7 @@ func TestSimple_TabSpecific_Snapshot(t *testing.T) {
 	}
 }
 
-func TestSimple_ListInstances(t *testing.T) {
-	s, _ := setupStrategy(t)
-	mux := serveMux(s)
-
-	req := httptest.NewRequest("GET", "/instances", nil)
-	rec := httptest.NewRecorder()
-	mux.ServeHTTP(rec, req)
-
-	if rec.Code != 200 {
-		t.Errorf("expected 200, got %d", rec.Code)
-	}
-}
+// GET /instances is now handled by the orchestrator, not the strategy.
 
 func TestSimple_ListTabs(t *testing.T) {
 	s, _ := setupStrategy(t)
