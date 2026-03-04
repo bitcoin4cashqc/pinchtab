@@ -13,7 +13,7 @@ import (
 func TestSnapshot_WithURL(t *testing.T) {
 	// URL param navigation needs an existing tab - create one first
 	navigate(t, "about:blank")
-	
+
 	params := url.Values{"url": {"https://example.com"}}
 	code, body := httpGet(t, "/snapshot?"+params.Encode())
 	if code != 200 {
@@ -48,7 +48,7 @@ func TestSnapshot_WithURL(t *testing.T) {
 func TestText_WithURL(t *testing.T) {
 	// URL param navigation needs an existing tab - create one first
 	navigate(t, "about:blank")
-	
+
 	params := url.Values{"url": {"https://example.com"}}
 	code, body := httpGet(t, "/text?"+params.Encode())
 	if code != 200 {
@@ -85,7 +85,7 @@ func TestText_WithURL(t *testing.T) {
 func TestFind_WithURL(t *testing.T) {
 	// URL param navigation needs an existing tab - create one first
 	navigate(t, "about:blank")
-	
+
 	code, body := httpPost(t, "/find", map[string]any{
 		"query": "Learn more",
 		"url":   "https://example.com",
