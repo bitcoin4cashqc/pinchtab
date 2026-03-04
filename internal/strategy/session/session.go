@@ -140,7 +140,6 @@ func (s *Strategy) RegisterRoutes(mux *http.ServeMux) {
 	// Tab + instance listing.
 	mux.HandleFunc("POST /tab", s.handleTabManage)
 	mux.HandleFunc("GET /tabs", s.handleListTabs)
-	mux.HandleFunc("GET /instances", s.handleListInstances)
 }
 
 // --- Session management ---
@@ -514,10 +513,6 @@ func (s *Strategy) handleListTabs(w http.ResponseWriter, _ *http.Request) {
 		allTabs = []map[string]string{}
 	}
 	web.JSON(w, http.StatusOK, allTabs)
-}
-
-func (s *Strategy) handleListInstances(w http.ResponseWriter, _ *http.Request) {
-	web.JSON(w, http.StatusOK, s.mgr.List())
 }
 
 // --- Internal helpers ---

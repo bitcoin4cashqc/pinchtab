@@ -84,9 +84,6 @@ func (s *Strategy) RegisterRoutes(mux *http.ServeMux) {
 	// Tab management.
 	mux.HandleFunc("POST /tab", s.handleTab)
 	mux.HandleFunc("GET /tabs", s.handleListTabs)
-
-	// Instance info (read-only, delegates to manager).
-	mux.HandleFunc("GET /instances", s.handleListInstances)
 }
 
 // --- Shorthand handlers (use current tab) ---
@@ -427,10 +424,6 @@ func (s *Strategy) handleListTabs(w http.ResponseWriter, r *http.Request) {
 		allTabs = []map[string]string{}
 	}
 	web.JSON(w, http.StatusOK, allTabs)
-}
-
-func (s *Strategy) handleListInstances(w http.ResponseWriter, _ *http.Request) {
-	web.JSON(w, http.StatusOK, s.mgr.List())
 }
 
 // --- Internal helpers ---
