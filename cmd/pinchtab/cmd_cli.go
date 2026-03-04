@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/pinchtab/pinchtab/internal/config"
@@ -13,12 +12,13 @@ import (
 func printHelp() {
 	fmt.Printf(`pinchtab %s - Browser control for AI agents
 
-MODES:
-  pinchtab                 Start server (default port 9867)
-  pinchtab connect <name>  Get URL for a running profile instance
+DAEMON COMMANDS:
+  pinchtab start           Start server in background
+  pinchtab stop            Stop the background server
+  pinchtab                 Start server (foreground)
 
 BROWSER COMMANDS:
-  pinchtab nav <url>              Navigate to URL
+  pinchtab nav <url>              Navigate to URL passing through server
   pinchtab snap [url]             Accessibility snapshot (-i, -c, -d; see SNAPSHOT FLAGS)
   pinchtab find <query> [--url u] Semantic element search (--top N, --threshold F)
   pinchtab text [url]             Extract readable text
@@ -88,6 +88,10 @@ ENVIRONMENT:
 }
 
 var cliCommands = map[string]bool{
+	// Daemon
+	"start": true,
+	"stop":  true,
+
 	// Management
 	"doctor":   true,
 	"health":   true,
@@ -98,7 +102,6 @@ var cliCommands = map[string]bool{
 
 	// Instances
 	"launch":    true,
-	"stop":      true,
 	"instances": true,
 
 	// Tabs
@@ -137,12 +140,20 @@ func isCLICommand(cmd string) bool {
 
 func runCLI(cfg *config.RuntimeConfig) {
 	cmd := os.Args[1]
+	args := os.Args[2:]
 
-	base := fmt.Sprintf("http://%s:%s", cfg.Bind, cfg.Port)
-	if envURL := os.Getenv("PINCHTAB_URL"); envURL != "" {
-		base = strings.TrimRight(envURL, "/")
+	// Daemon commands don't need server check
+	if cmd == "start" {
+		cliStart(cfg)
+		return
+	}
+	// Stop with no args = daemon stop, with args = instance stop
+	if cmd == "stop" && len(args) == 0 {
+		cliStopDaemon(cfg)
+		return
 	}
 
+	base := getServerURL(cfg)
 	token := cfg.Token
 	if envToken := os.Getenv("PINCHTAB_TOKEN"); envToken != "" {
 		token = envToken
@@ -150,7 +161,11 @@ func runCLI(cfg *config.RuntimeConfig) {
 
 	client := &http.Client{Timeout: 30 * time.Second}
 
-	args := os.Args[2:]
+	// Check if server is running for all other commands
+	if err := checkServerRunning(base); err != nil {
+		fmt.Fprintf(os.Stderr, "❌ %v\n", err)
+		os.Exit(1)
+	}
 
 	switch cmd {
 	// Management
