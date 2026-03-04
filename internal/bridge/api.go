@@ -27,6 +27,7 @@ type BridgeAPI interface {
 	AvailableActions() []string
 
 	TabLockInfo(tabID string) *LockInfo
+	TabHashID(cdpID string) string
 	Lock(tabID, owner string, ttl time.Duration) error
 	Unlock(tabID, owner string) error
 

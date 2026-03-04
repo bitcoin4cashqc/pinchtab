@@ -387,6 +387,19 @@ func (tm *TabManager) RegisterHashTab(hashID, rawCDPID string, ctx context.Conte
 	}
 }
 
+// HashIDForCDP returns the hash-based tab ID for a given CDP target ID.
+// Returns empty string if not found.
+func (tm *TabManager) HashIDForCDP(cdpID string) string {
+	tm.mu.RLock()
+	defer tm.mu.RUnlock()
+	for hashID, entry := range tm.tabs {
+		if entry.CDPID == cdpID {
+			return hashID
+		}
+	}
+	return ""
+}
+
 func (tm *TabManager) CleanStaleTabs(ctx context.Context, interval time.Duration) {
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()

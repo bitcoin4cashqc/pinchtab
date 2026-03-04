@@ -102,6 +102,12 @@ func (b *Bridge) TabLockInfo(tabID string) *LockInfo {
 	return b.Locks.Get(tabID)
 }
 
+// TabHashID returns the hash-based tab ID for a given CDP target ID.
+// Returns empty string if not found.
+func (b *Bridge) TabHashID(cdpID string) string {
+	return b.HashIDForCDP(cdpID)
+}
+
 func (b *Bridge) EnsureChrome(cfg *config.RuntimeConfig) error {
 	b.initMu.Lock()
 	defer b.initMu.Unlock()

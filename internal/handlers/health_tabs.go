@@ -95,17 +95,38 @@ func (h *Handlers) HandleTabs(w http.ResponseWriter, r *http.Request) {
 
 	tabs := make([]map[string]any, 0, len(targets))
 	for _, t := range targets {
-		entry := map[string]any{
-			"id":    string(t.TargetID),
-			"url":   t.URL,
-			"title": t.Title,
-			"type":  t.Type,
+		// Get hash-based tab ID if registered
+		hashID := h.Bridge.TabHashID(string(t.TargetID))
+		cdpID := string(t.TargetID)
+		
+		if hashID == "" {
+			// Not registered with hash ID - use CDP ID as main ID
+			entry := map[string]any{
+				"id":    cdpID,
+				"url":   t.URL,
+				"title": t.Title,
+				"type":  t.Type,
+			}
+			if lock := h.Bridge.TabLockInfo(cdpID); lock != nil {
+				entry["owner"] = lock.Owner
+				entry["lockedUntil"] = lock.ExpiresAt.Format(time.RFC3339)
+			}
+			tabs = append(tabs, entry)
+		} else {
+			// Has hash ID - use it as main ID, include CDP ID as metadata
+			entry := map[string]any{
+				"id":    hashID,
+				"cdpId": cdpID,
+				"url":   t.URL,
+				"title": t.Title,
+				"type":  t.Type,
+			}
+			if lock := h.Bridge.TabLockInfo(cdpID); lock != nil {
+				entry["owner"] = lock.Owner
+				entry["lockedUntil"] = lock.ExpiresAt.Format(time.RFC3339)
+			}
+			tabs = append(tabs, entry)
 		}
-		if lock := h.Bridge.TabLockInfo(string(t.TargetID)); lock != nil {
-			entry["owner"] = lock.Owner
-			entry["lockedUntil"] = lock.ExpiresAt.Format(time.RFC3339)
-		}
-		tabs = append(tabs, entry)
 	}
 	web.JSON(w, 200, map[string]any{"tabs": tabs})
 }
