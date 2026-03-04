@@ -23,18 +23,38 @@ func cliNavigate(client *http.Client, base, token string, args []string) {
 
 func cliSnapshot(client *http.Client, base, token string, args []string) {
 	params := url.Values{}
+	rawFormat := ""
 	for i := 0; i < len(args); i++ {
 		switch args[i] {
 		case "-i", "--interactive":
 			params.Set("filter", "interactive")
 		case "-c", "--compact":
-			params.Set("compact", "true")
+			params.Set("format", "compact")
+			rawFormat = "compact"
 		case "--text":
 			params.Set("format", "text")
-		case "-d", "--depth":
+			rawFormat = "text"
+		case "-d", "--diff":
+			params.Set("diff", "true")
+		case "--depth":
 			if i+1 < len(args) {
 				i++
 				params.Set("depth", args[i])
+			}
+		case "-s", "--selector":
+			if i+1 < len(args) {
+				i++
+				params.Set("selector", args[i])
+			}
+		case "--max-tokens":
+			if i+1 < len(args) {
+				i++
+				params.Set("maxTokens", args[i])
+			}
+		case "--tab":
+			if i+1 < len(args) {
+				i++
+				params.Set("tabId", args[i])
 			}
 		default:
 			if strings.HasPrefix(args[i], "http") {
@@ -42,6 +62,13 @@ func cliSnapshot(client *http.Client, base, token string, args []string) {
 			}
 		}
 	}
+
+	if rawFormat != "" && params.Get("diff") != "true" {
+		rawBody := doGetRaw(client, base, token, "/snapshot", params)
+		fmt.Println(string(rawBody))
+		return
+	}
+
 	result := doGet(client, base, token, "/snapshot", params)
 	out, _ := json.MarshalIndent(result, "", "  ")
 	fmt.Println(string(out))
@@ -148,12 +175,85 @@ func cliScreenshot(client *http.Client, base, token string, args []string) {
 func cliPDF(client *http.Client, base, token string, args []string) {
 	params := url.Values{}
 	outFile := ""
+	serverSideOutput := false
 	for i := 0; i < len(args); i++ {
 		switch args[i] {
-		case "--out":
+		case "-o", "--out":
 			if i+1 < len(args) {
 				i++
 				outFile = args[i]
+			}
+		case "--landscape":
+			params.Set("landscape", "true")
+		case "--tab":
+			if i+1 < len(args) {
+				i++
+				params.Set("tabId", args[i])
+			}
+		case "--paper-width":
+			if i+1 < len(args) {
+				i++
+				params.Set("paperWidth", args[i])
+			}
+		case "--paper-height":
+			if i+1 < len(args) {
+				i++
+				params.Set("paperHeight", args[i])
+			}
+		case "--margin-top":
+			if i+1 < len(args) {
+				i++
+				params.Set("marginTop", args[i])
+			}
+		case "--margin-bottom":
+			if i+1 < len(args) {
+				i++
+				params.Set("marginBottom", args[i])
+			}
+		case "--margin-left":
+			if i+1 < len(args) {
+				i++
+				params.Set("marginLeft", args[i])
+			}
+		case "--margin-right":
+			if i+1 < len(args) {
+				i++
+				params.Set("marginRight", args[i])
+			}
+		case "--scale":
+			if i+1 < len(args) {
+				i++
+				params.Set("scale", args[i])
+			}
+		case "--page-ranges":
+			if i+1 < len(args) {
+				i++
+				params.Set("pageRanges", args[i])
+			}
+		case "--prefer-css-page-size":
+			params.Set("preferCSSPageSize", "true")
+		case "--display-header-footer":
+			params.Set("displayHeaderFooter", "true")
+		case "--header-template":
+			if i+1 < len(args) {
+				i++
+				params.Set("headerTemplate", args[i])
+			}
+		case "--footer-template":
+			if i+1 < len(args) {
+				i++
+				params.Set("footerTemplate", args[i])
+			}
+		case "--generate-tagged-pdf":
+			params.Set("generateTaggedPDF", "true")
+		case "--generate-document-outline":
+			params.Set("generateDocumentOutline", "true")
+		case "--file-output":
+			serverSideOutput = true
+		case "--path":
+			if i+1 < len(args) {
+				i++
+				params.Set("path", args[i])
 			}
 		default:
 			if strings.HasPrefix(args[i], "http") {
@@ -161,6 +261,23 @@ func cliPDF(client *http.Client, base, token string, args []string) {
 			}
 		}
 	}
+
+	if serverSideOutput {
+		if outFile != "" {
+			fmt.Fprintln(os.Stderr, "Cannot combine --file-output with --out")
+			os.Exit(1)
+		}
+		params.Set("output", "file")
+		result := doGet(client, base, token, "/pdf", params)
+		if path, ok := result["path"].(string); ok {
+			fmt.Printf("PDF saved on server: %s\n", path)
+			return
+		}
+		out, _ := json.MarshalIndent(result, "", "  ")
+		fmt.Println(string(out))
+		return
+	}
+
 	if outFile == "" {
 		outFile = "page.pdf"
 	}

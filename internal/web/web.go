@@ -70,7 +70,7 @@ func (w *StatusWriter) Flush() {
 // - Other errors → use provided default code
 func ErrorAuto(w http.ResponseWriter, defaultCode int, err error) {
 	code := defaultCode
-	
+
 	// Check if error has a StatusCode() method
 	type statusCoder interface {
 		StatusCode() int
@@ -78,6 +78,6 @@ func ErrorAuto(w http.ResponseWriter, defaultCode int, err error) {
 	if sc, ok := err.(statusCoder); ok {
 		code = sc.StatusCode()
 	}
-	
+
 	Error(w, code, err)
 }

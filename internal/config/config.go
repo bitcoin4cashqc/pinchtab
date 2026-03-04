@@ -25,10 +25,10 @@ type RuntimeConfig struct {
 	Timezone          string
 	BlockImages       bool
 	BlockMedia        bool
-	BlockAds         bool
-	MaxTabs          int
+	BlockAds          bool
+	MaxTabs           int
 	TabEvictionPolicy string // "reject" (default), "close_oldest", "close_lru"
-	ChromeBinary     string
+	ChromeBinary      string
 	ChromeExtraFlags  string
 	UserAgent         string
 	NoAnimations      bool

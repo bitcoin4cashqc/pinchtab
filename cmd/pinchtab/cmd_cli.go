@@ -19,11 +19,11 @@ MODES:
 
 BROWSER COMMANDS:
   pinchtab nav <url>              Navigate to URL
-  pinchtab snap [url]             Accessibility snapshot (-i interactive, -c compact)
+  pinchtab snap [url]             Accessibility snapshot (-i, -c, -d; see SNAPSHOT FLAGS)
   pinchtab find <query> [--url u] Semantic element search (--top N, --threshold F)
   pinchtab text [url]             Extract readable text
   pinchtab screenshot [url]       Capture screenshot (--out file)
-  pinchtab pdf [url]              Export PDF (--out file)
+  pinchtab pdf [url]              Export PDF (see PDF FLAGS)
   pinchtab click <ref>            Click element by ref
   pinchtab type <ref> <text>      Type text into element
   pinchtab fill <ref> <text>      Fill/replace input value
@@ -49,6 +49,36 @@ MANAGEMENT COMMANDS:
   pinchtab config init   Initialize config file
   pinchtab config show   Display current configuration
   pinchtab help          Show this help
+
+SNAPSHOT FLAGS:
+  -i, --interactive    Interactive elements only
+  -c, --compact        Compact plain-text snapshot output
+  -d, --diff           Only changes since last snapshot
+  -s, --selector CSS   Scope to CSS selector
+  --max-tokens N       Truncate to ~N tokens
+  --depth N            Max tree depth
+  --tab ID             Target specific tab
+
+PDF FLAGS:
+  -o, --out FILE             Save PDF locally (default: page.pdf)
+  --landscape                Landscape orientation
+  --tab ID                   Target specific tab
+  --paper-width N            Paper width (inches)
+  --paper-height N           Paper height (inches)
+  --margin-top N             Top margin (inches)
+  --margin-bottom N          Bottom margin (inches)
+  --margin-left N            Left margin (inches)
+  --margin-right N           Right margin (inches)
+  --scale N                  Print scale 0.1-2.0
+  --page-ranges RANGE        Pages to export (e.g. 1-3,5)
+  --prefer-css-page-size     Honor CSS @page size
+  --display-header-footer    Show header/footer
+  --header-template HTML     Header template
+  --footer-template HTML     Footer template
+  --generate-tagged-pdf      Generate accessible/tagged PDF
+  --generate-document-outline  Embed document outline
+  --file-output              Save PDF in server state dir
+  --path PATH                Custom server-side path (with --file-output)
 
 ENVIRONMENT:
   PINCHTAB_URL    Server URL (default: http://127.0.0.1:9867)
