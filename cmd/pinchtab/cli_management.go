@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -40,48 +39,9 @@ func cliProfiles(client *http.Client, base, token string) {
 }
 
 func cliInstances(client *http.Client, base, token string) {
-	// /instances returns an array directly, not {"instances": [...]}
+	// /instances returns an array directly - just print it as JSON
 	body := doGetRaw(client, base, token, "/instances", nil)
-	
-	var instances []map[string]any
-	if err := json.Unmarshal(body, &instances); err != nil {
-		fmt.Fprintf(os.Stderr, "❌ Failed to parse instances: %v\n", err)
-		os.Exit(1)
-	}
-
-	if len(instances) == 0 {
-		fmt.Println("No instances running")
-		fmt.Println("\nTo launch an instance:")
-		fmt.Println("  pinchtab launch            # headless, auto-named")
-		fmt.Println("  pinchtab launch myprofile   # named profile")
-		return
-	}
-
-	fmt.Println("\n🚀 Running Instances:")
-	fmt.Println()
-
-	for _, m := range instances {
-		id, _ := m["id"].(string)
-		port, _ := m["port"].(string)
-		status, _ := m["status"].(string)
-		headless, _ := m["headless"].(bool)
-
-		mode := "headless"
-		if !headless {
-			mode = "headed"
-		}
-
-		icon := "▶️"
-		if status != "running" {
-			icon = "⏸️"
-		}
-
-		fmt.Printf("  %s %s (port %s, %s)\n", icon, id, port, mode)
-		if port != "" && status == "running" {
-			fmt.Printf("     → http://localhost:%s\n", port)
-		}
-	}
-	fmt.Println()
+	fmt.Println(string(body))
 }
 
 func cliLaunch(client *http.Client, base, token string, args []string) {
@@ -119,36 +79,9 @@ func cliStop(client *http.Client, base, token string, args []string) {
 }
 
 func cliTabs(client *http.Client, base, token string) {
-	// /tabs returns an array directly, not {"tabs": [...]}
+	// /tabs returns an array directly - just print it as JSON
 	body := doGetRaw(client, base, token, "/tabs", nil)
-	
-	var tabs []map[string]any
-	if err := json.Unmarshal(body, &tabs); err != nil {
-		fmt.Fprintf(os.Stderr, "❌ Failed to parse tabs: %v\n", err)
-		os.Exit(1)
-	}
-
-	if len(tabs) == 0 {
-		fmt.Println("No tabs open")
-		return
-	}
-
-	fmt.Println("\n📑 Open Tabs:")
-	fmt.Println()
-
-	for _, m := range tabs {
-		id, _ := m["id"].(string)
-		tabURL, _ := m["url"].(string)
-		title, _ := m["title"].(string)
-
-		if title == "" {
-			title = "(untitled)"
-		}
-
-		fmt.Printf("  [%s] %s\n", id, title)
-		fmt.Printf("       %s\n", tabURL)
-	}
-	fmt.Println()
+	fmt.Println(string(body))
 }
 
 func cliOpen(client *http.Client, base, token string, args []string) {
