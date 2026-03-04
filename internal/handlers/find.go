@@ -31,6 +31,7 @@ type findResponse struct {
 	Threshold    float64                 `json:"threshold"`
 	LatencyMs    int64                   `json:"latency_ms"`
 	ElementCount int                     `json:"element_count"`
+	TabID        string                  `json:"tabId"`
 }
 
 // HandleFind performs semantic element matching against the accessibility
@@ -128,6 +129,7 @@ func (h *Handlers) HandleFind(w http.ResponseWriter, r *http.Request) {
 		Threshold:    req.Threshold,
 		LatencyMs:    time.Since(start).Milliseconds(),
 		ElementCount: result.ElementCount,
+		TabID:        resolvedTabID,
 	}
 	if resp.Matches == nil {
 		resp.Matches = []semantic.ElementMatch{}

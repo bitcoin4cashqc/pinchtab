@@ -34,7 +34,7 @@ func (h *Handlers) HandleText(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	ctx, _, err := h.Bridge.TabContext(tabID)
+	ctx, resolvedTabID, err := h.Bridge.TabContext(tabID)
 	if err != nil {
 		web.Error(w, 404, err)
 		return
@@ -90,6 +90,7 @@ func (h *Handlers) HandleText(w http.ResponseWriter, r *http.Request) {
 		"title":     title,
 		"text":      text,
 		"truncated": truncated,
+		"tabId":     resolvedTabID,
 	})
 }
 

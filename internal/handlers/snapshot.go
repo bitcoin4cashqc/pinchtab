@@ -360,6 +360,7 @@ func (h *Handlers) HandleSnapshot(w http.ResponseWriter, r *http.Request) {
 			"title": title,
 			"nodes": flat,
 			"count": len(flat),
+			"tabId": resolvedTabID,
 		}
 		if truncated {
 			resp["truncated"] = true
