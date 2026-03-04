@@ -12,9 +12,11 @@
 package simple
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"sync"
 
@@ -272,15 +274,26 @@ func (s *Strategy) handleEvaluate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Strategy) handleFind(w http.ResponseWriter, r *http.Request) {
-	// Check if URL provided - if so, create new tab
-	urlParam := r.URL.Query().Get("url")
-	if urlParam != "" {
+	// Check request body for URL parameter (find is POST with JSON body)
+	var req struct {
+		URL string `json:"url,omitempty"`
+	}
+	if r.Body != nil {
+		bodyBytes, _ := io.ReadAll(r.Body)
+		r.Body.Close()
+		_ = json.Unmarshal(bodyBytes, &req)
+		// Restore body for proxy
+		r.Body = io.NopCloser(bytes.NewReader(bodyBytes))
+	}
+	
+	// If URL provided, create new tab and navigate
+	if req.URL != "" {
 		port, err := s.ensureInstance()
 		if err != nil {
 			web.Error(w, http.StatusServiceUnavailable, fmt.Errorf("no instance available: %w", err))
 			return
 		}
-		tabID, err := s.bridge.CreateTab(r.Context(), port, urlParam)
+		tabID, err := s.bridge.CreateTab(r.Context(), port, req.URL)
 		if err != nil {
 			web.Error(w, http.StatusInternalServerError, fmt.Errorf("create tab: %w", err))
 			return
