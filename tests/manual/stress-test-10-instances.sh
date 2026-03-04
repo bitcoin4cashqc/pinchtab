@@ -17,25 +17,9 @@ sleep 2
 echo "✓ Dashboard started (PID: $DASHBOARD_PID)"
 echo ""
 
-# Create 10 instances concurrently
-echo "Creating 10 headless instances concurrently..."
+# Create 10 instances
+echo "Creating 10 headless instances..."
 
-INST_IDS=()
-for i in {1..10}; do
-  curl -s -X POST http://localhost:9867/instances/launch \
-    -H "Content-Type: application/json" \
-    -d "{\"name\":\"stress-inst-$i\",\"headless\":true}" | jq -r '.id' &
-done
-
-# Wait for all to complete and collect IDs
-for i in {1..10}; do
-  INST_ID=$(wait -p PID; curl -s -X POST http://localhost:9867/instances/launch \
-    -H "Content-Type: application/json" \
-    -d "{\"name\":\"stress-inst-$i\",\"headless\":true}" | jq -r '.id')
-  INST_IDS+=($INST_ID)
-done
-
-# Simpler approach: create sequentially but fast
 INST_IDS=()
 for i in {1..10}; do
   INST=$(curl -s -X POST http://localhost:9867/instances/launch \
