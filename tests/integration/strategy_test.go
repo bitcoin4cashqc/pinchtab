@@ -102,10 +102,10 @@ func (s *strategyServer) post(t *testing.T, path string, payload any) (int, []by
 	return resp.StatusCode, body
 }
 
-// TestStrategy_SimpleMode starts a separate server with PINCHTAB_STRATEGY=simple
+// TestStrategy_DefaultMode starts a separate server with PINCHTAB_STRATEGY=default
 // and verifies the shorthand endpoints work through the strategy layer.
-func TestStrategy_SimpleMode(t *testing.T) {
-	srv := startStrategyServer(t, "simple", "19877")
+func TestStrategy_DefaultMode(t *testing.T) {
+	srv := startStrategyServer(t, "default", "19877")
 	defer srv.stop()
 
 	// Health check should report strategy.
@@ -117,11 +117,11 @@ func TestStrategy_SimpleMode(t *testing.T) {
 	if err := json.Unmarshal(body, &health); err != nil {
 		t.Fatalf("invalid JSON: %v", err)
 	}
-	if health["strategy"] != "simple" {
-		t.Errorf("strategy = %v, want 'simple'", health["strategy"])
+	if health["strategy"] != "default" {
+		t.Errorf("strategy = %v, want 'default'", health["strategy"])
 	}
 
-	// Simple strategy auto-launches an instance. Wait for it to be ready.
+	// Default strategy auto-launches an instance. Wait for it to be ready.
 	deadline := time.Now().Add(30 * time.Second)
 	ready := false
 	for time.Now().Before(deadline) {

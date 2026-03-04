@@ -57,7 +57,7 @@ func TestConcurrentOperationsMultipleInstances(t *testing.T) {
 	t.Log("✓ All 3 instances running")
 
 	// Navigate sequentially via orchestrator shorthand
-	// Simple strategy allocates across running instances
+	// Default strategy allocates across running instances
 	t.Log("Navigating via orchestrator shorthand (sequential)...")
 	urls := []string{
 		"https://example.com",
@@ -100,7 +100,7 @@ func TestConcurrentOperationsMultipleInstances(t *testing.T) {
 }
 
 // navigateViaOrchestrator calls POST /navigate on the orchestrator.
-// The simple strategy auto-allocates a running instance.
+// The default strategy auto-allocates a running instance.
 func navigateViaOrchestrator(serverURL, url string) error {
 	body, _ := json.Marshal(map[string]string{"url": url})
 	resp, err := http.Post(

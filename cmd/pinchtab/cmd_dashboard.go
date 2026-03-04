@@ -110,7 +110,7 @@ func runDashboard(cfg *config.RuntimeConfig) {
 		mgr := orch.InstanceManager()
 
 		switch cfg.Strategy {
-		case "simple":
+		case "default":
 			activeStrategy = simple.New(mgr)
 		case "session":
 			activeStrategy = session.New(mgr)
@@ -123,7 +123,7 @@ func runDashboard(cfg *config.RuntimeConfig) {
 			activeStrategy = s
 		default:
 			slog.Error("unknown strategy", "strategy", cfg.Strategy,
-				"available", "simple, session, explicit")
+				"available", "default, session, explicit")
 			os.Exit(1)
 		}
 
@@ -135,15 +135,15 @@ func runDashboard(cfg *config.RuntimeConfig) {
 		activeStrategy.RegisterRoutes(mux)
 		strategyActive = true
 
-		// Simple strategy: auto-launch one instance so it's ready immediately.
-		if cfg.Strategy == "simple" {
+		// Default strategy: auto-launch one instance so it's ready immediately.
+		if cfg.Strategy == "default" {
 			go func() {
 				inst, err := orch.Launch(fmt.Sprintf("instance-%d", time.Now().UnixNano()), "", true)
 				if err != nil {
-					slog.Error("simple strategy: failed to auto-launch instance", "err", err)
+					slog.Error("default strategy: failed to auto-launch instance", "err", err)
 					return
 				}
-				slog.Info("simple strategy: instance ready", "id", inst.ID, "port", inst.Port)
+				slog.Info("default strategy: instance ready", "id", inst.ID, "port", inst.Port)
 			}()
 		}
 

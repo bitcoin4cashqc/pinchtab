@@ -178,7 +178,7 @@ func Load() *RuntimeConfig {
 		NavigateTimeout:   60 * time.Second,
 		ShutdownTimeout:   10 * time.Second,
 		WaitNavDelay:      1 * time.Second,
-		Strategy:          os.Getenv("PINCHTAB_STRATEGY"),
+		Strategy:          envOr("PINCHTAB_STRATEGY", "default"),
 		AllocationPolicy:  envOr("PINCHTAB_ALLOCATION_POLICY", "fcfs"),
 	}
 

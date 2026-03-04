@@ -164,7 +164,7 @@ func TestListenAddr(t *testing.T) {
 }
 
 func TestStrategyConfigEnv(t *testing.T) {
-	_ = os.Setenv("PINCHTAB_STRATEGY", "simple")
+	_ = os.Setenv("PINCHTAB_STRATEGY", "default")
 	_ = os.Setenv("PINCHTAB_ALLOCATION_POLICY", "round_robin")
 	defer func() {
 		_ = os.Unsetenv("PINCHTAB_STRATEGY")
@@ -172,8 +172,8 @@ func TestStrategyConfigEnv(t *testing.T) {
 	}()
 
 	cfg := Load()
-	if cfg.Strategy != "simple" {
-		t.Errorf("Strategy = %q, want simple", cfg.Strategy)
+	if cfg.Strategy != "default" {
+		t.Errorf("Strategy = %q, want default", cfg.Strategy)
 	}
 	if cfg.AllocationPolicy != "round_robin" {
 		t.Errorf("AllocationPolicy = %q, want round_robin", cfg.AllocationPolicy)
@@ -186,8 +186,8 @@ func TestStrategyConfigDefaults(t *testing.T) {
 	_ = os.Unsetenv("PINCHTAB_ALLOCATION_POLICY")
 
 	cfg := Load()
-	if cfg.Strategy != "" {
-		t.Errorf("default Strategy = %q, want empty", cfg.Strategy)
+	if cfg.Strategy != "default" {
+		t.Errorf("default Strategy = %q, want default", cfg.Strategy)
 	}
 	if cfg.AllocationPolicy != "fcfs" {
 		t.Errorf("default AllocationPolicy = %q, want fcfs", cfg.AllocationPolicy)

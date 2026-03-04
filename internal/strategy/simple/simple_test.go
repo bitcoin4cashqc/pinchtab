@@ -139,8 +139,8 @@ func TestSimple_Name(t *testing.T) {
 	launcher := &mockLauncher{}
 	mgr := instance.NewManager(launcher, instance.NewBridgeClient(), nil)
 	s := simple.New(mgr)
-	if s.Name() != "simple" {
-		t.Errorf("expected simple, got %s", s.Name())
+	if s.Name() != "default" {
+		t.Errorf("expected default, got %s", s.Name())
 	}
 }
 

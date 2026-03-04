@@ -282,8 +282,8 @@ func ValidateConfig() (bool, []string) {
 	}
 
 	// Validate strategy
-	if fc.Strategy != "" && fc.Strategy != "simple" && fc.Strategy != "session" && fc.Strategy != "explicit" {
-		errs = append(errs, fmt.Sprintf("invalid strategy: %s (must be simple, session, or explicit)", fc.Strategy))
+	if fc.Strategy != "" && fc.Strategy != "default" && fc.Strategy != "session" && fc.Strategy != "explicit" {
+		errs = append(errs, fmt.Sprintf("invalid strategy: %s (must be default, session, or explicit)", fc.Strategy))
 	}
 
 	// Validate allocation policy

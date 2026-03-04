@@ -1,6 +1,6 @@
-// Package simple implements the Simple allocation strategy.
+// Package simple implements the Default allocation strategy.
 //
-// Simple strategy makes Orchestrator mode feel like Bridge mode.
+// Default strategy makes Orchestrator mode feel like Bridge mode.
 // Agents get shorthand endpoints (/navigate, /snapshot, /action, etc.)
 // without needing to know about instances or tab IDs.
 //
@@ -43,7 +43,7 @@ func New(mgr *instance.Manager) *Strategy {
 	}
 }
 
-func (s *Strategy) Name() string { return "simple" }
+func (s *Strategy) Name() string { return "default" }
 
 // Init receives primitives (unused — Simple strategy uses instance.Manager directly).
 func (s *Strategy) Init(_ *primitive.Primitives) error { return nil }
