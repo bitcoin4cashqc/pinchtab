@@ -34,6 +34,7 @@ type RuntimeConfig struct {
 	UserAgent         string
 	NoAnimations      bool
 	StealthLevel      string
+	TabEvictionPolicy string // "reject" (default), "close_oldest", "close_lru"
 	ActionTimeout     time.Duration
 	NavigateTimeout   time.Duration
 	ShutdownTimeout   time.Duration
@@ -247,6 +248,7 @@ func Load() *RuntimeConfig {
 		UserAgent:         envMigrate("PINCHTAB_USER_AGENT", "BRIDGE_USER_AGENT"),
 		NoAnimations:      envBoolOrMigrate("PINCHTAB_NO_ANIMATIONS", "BRIDGE_NO_ANIMATIONS", false),
 		StealthLevel:      envOrMigrate("PINCHTAB_STEALTH", "BRIDGE_STEALTH", "light"),
+		TabEvictionPolicy: envOr("PINCHTAB_TAB_EVICTION_POLICY", "reject"),
 		ActionTimeout:     30 * time.Second,
 		NavigateTimeout:   60 * time.Second,
 		ShutdownTimeout:   10 * time.Second,

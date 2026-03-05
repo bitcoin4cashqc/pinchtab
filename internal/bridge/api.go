@@ -39,6 +39,9 @@ type BridgeAPI interface {
 
 	// Crash monitoring
 	GetCrashLogs() []string
+
+	// TabHashID returns the semantic tab ID for a raw CDP target ID.
+	TabHashID(cdpID string) string
 }
 
 type LockInfo struct {

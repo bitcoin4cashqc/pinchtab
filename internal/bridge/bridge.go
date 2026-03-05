@@ -15,10 +15,12 @@ import (
 )
 
 type TabEntry struct {
-	Ctx      context.Context
-	Cancel   context.CancelFunc
-	Accessed bool
-	CDPID    string // raw CDP target ID; set when this entry is a hash-alias
+	Ctx       context.Context
+	Cancel    context.CancelFunc
+	Accessed  bool
+	CDPID     string    // raw CDP target ID; set when this entry is a hash-alias
+	CreatedAt time.Time // when the tab was first created/registered
+	LastUsed  time.Time // last time the tab was accessed via TabContext
 }
 
 type RefCache struct {
@@ -182,6 +184,11 @@ func (b *Bridge) AvailableActions() []string {
 		keys = append(keys, k)
 	}
 	return keys
+}
+
+// TabHashID returns the semantic tab ID for a raw CDP target ID.
+func (b *Bridge) TabHashID(cdpID string) string {
+	return b.IdMgr.TabIDFromCDPTarget(cdpID)
 }
 
 // ActionFunc is the type for action handlers.

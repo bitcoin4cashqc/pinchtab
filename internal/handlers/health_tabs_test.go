@@ -350,6 +350,10 @@ func (m *MockBridge) GetCrashLogs() []string {
 	return nil
 }
 
+func (m *MockBridge) TabHashID(cdpID string) string {
+	return "tab_" + cdpID
+}
+
 type mockBridgeDisconnected struct {
 	mockBridge
 }

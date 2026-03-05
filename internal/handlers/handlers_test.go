@@ -79,6 +79,10 @@ func (m *mockBridge) GetCrashLogs() []string {
 	return nil
 }
 
+func (m *mockBridge) TabHashID(cdpID string) string {
+	return "tab_" + cdpID
+}
+
 func TestHandlers(t *testing.T) {
 	h := New(&mockBridge{}, &config.RuntimeConfig{}, nil, nil, nil)
 	mux := http.NewServeMux()
