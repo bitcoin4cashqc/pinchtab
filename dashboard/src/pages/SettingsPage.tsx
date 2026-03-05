@@ -5,7 +5,11 @@ import { ServerSummary } from "../components/molecules";
 import type { Settings } from "../types";
 
 export default function SettingsPage() {
-  const { settings, setSettings, serverInfo } = useAppStore();
+  const {
+    settings,
+    setSettings,
+    // serverInfo
+  } = useAppStore();
   const [local, setLocal] = useState<Settings>(settings);
 
   // Check if settings have changed
@@ -47,7 +51,7 @@ export default function SettingsPage() {
         {/* Settings Content */}
         <div className="flex-1 space-y-6 overflow-y-auto pr-2">
           {/* Policies & Strategy */}
-          {serverInfo && (
+          {/* {serverInfo && (
             <Card className="p-4">
               <h3 className="mb-4 text-sm font-semibold text-text-primary">
                 ⚖️ Policies & Strategy
@@ -81,7 +85,7 @@ export default function SettingsPage() {
                 </div>
               </div>
             </Card>
-          )}
+          )} */}
 
           {/* Screencast */}
           <Card className="p-4">
@@ -90,7 +94,9 @@ export default function SettingsPage() {
             </h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <label className="text-sm text-text-secondary">Frame Rate</label>
+                <label className="text-sm text-text-secondary">
+                  Frame Rate
+                </label>
                 <div className="flex items-center gap-2">
                   <input
                     type="range"
@@ -100,7 +106,10 @@ export default function SettingsPage() {
                     onChange={(e) =>
                       setLocal({
                         ...local,
-                        screencast: { ...local.screencast, fps: +e.target.value },
+                        screencast: {
+                          ...local.screencast,
+                          fps: +e.target.value,
+                        },
                       })
                     }
                     className="w-32"

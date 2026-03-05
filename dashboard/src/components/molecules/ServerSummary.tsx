@@ -16,9 +16,9 @@ export default function ServerSummary() {
     return `${s}s`;
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-  };
+  // const copyToClipboard = (text: string) => {
+  //   navigator.clipboard.writeText(text);
+  // };
 
   return (
     <div className="flex flex-col gap-4">
@@ -50,7 +50,7 @@ export default function ServerSummary() {
           </div>
         </div>
 
-        {serverInfo.configPath && (
+        {/* {serverInfo.configPath && (
           <div className="flex flex-col gap-0.5">
             <label className="text-[10px] font-semibold text-text-muted uppercase tracking-tight">
               Config
@@ -68,7 +68,7 @@ export default function ServerSummary() {
               </span>
             </div>
           </div>
-        )}
+        )} */}
       </Card>
     </div>
   );
