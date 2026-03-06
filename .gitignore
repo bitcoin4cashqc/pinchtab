@@ -7,7 +7,7 @@ browser-bridge
 /pinchtab
 coverage.out
 
-# Build artifacts
+# Build artifacts and test output
 dist/
 *.js
 !scripts/**/*.js
