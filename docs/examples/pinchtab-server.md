@@ -66,6 +66,10 @@ INST=$(curl -s -X POST "$BASE/instances/launch" \
   | jq -r '.id')
 
 echo "$INST"
+# CLI alternative
+pinchtab instance launch --mode headless
+# or with a specific profile:
+pinchtab instance launch --profileId prof_xxx --mode headed
 # Response
 {
   "id": "inst_944a07ad",
@@ -209,6 +213,8 @@ INST2=$(curl -s -X POST "$BASE/instances/launch" \
 
 echo "Instance 2: $INST2"
 curl -s "$BASE/instances" | jq '.[].profileName'
+# CLI alternative
+pinchtab instance launch --mode headless
 # Response
 "my-profile"
 "another-profile"
@@ -218,6 +224,8 @@ curl -s "$BASE/instances" | jq '.[].profileName'
 
 ```bash
 curl -s -X DELETE "$BASE/instances/$INST" | jq .
+# CLI alternative
+pinchtab instance stop $INST
 # Response
 {
   "stopped": true
@@ -236,13 +244,27 @@ CDP_URL=$(curl -s http://localhost:9222/json/version | jq -r '.webSocketDebugger
 curl -s -X POST "$BASE/instances/attach" \
   -H "Content-Type: application/json" \
   -d "{\"cdpUrl\":\"$CDP_URL\"}" | jq .
-```
-
-```jsonc
-// Response
+# Response
 {
   "id": "inst_abc123",
   "attached": true,
   "cdpUrl": "ws://localhost:9222/devtools/browser/..."
 }
 ```
+
+## CLI Quick Reference (Server Mode)
+
+| Action | CLI Command |
+|--------|-------------|
+| Health check | `pinchtab health` |
+| List profiles | `pinchtab profiles` |
+| List instances | `pinchtab instances` |
+| Launch instance | `pinchtab instance launch --mode headless` |
+| Stop instance | `pinchtab instance stop <id>` |
+| Navigate | `pinchtab nav <url> --instance <id>` |
+| Snapshot | `pinchtab snap -i -c --instance <id>` |
+| Click | `pinchtab click <ref> --instance <id>` |
+| Screenshot | `pinchtab ss -o file.jpg --instance <id>` |
+| PDF export | `pinchtab pdf -o file.pdf --instance <id>` |
+
+> **Tip:** Use `pinchtab instances` to get instance IDs, then use `--instance <id>` or `-I <id>` with other commands.
