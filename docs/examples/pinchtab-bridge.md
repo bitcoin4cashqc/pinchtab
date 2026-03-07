@@ -33,9 +33,6 @@ The commands below assume `jq` is installed.
 
 ```bash
 curl -s "$BASE/health" | jq .
-```
-
-```bash
 # CLI alternative
 pinchtab health
 ```
@@ -54,9 +51,6 @@ pinchtab health
 curl -s -X POST "$BASE/navigate" \
   -H "Content-Type: application/json" \
   -d '{"url":"https://github.com/pinchtab/pinchtab"}' | jq .
-```
-
-```bash
 # CLI alternative
 pinchtab nav https://github.com/pinchtab/pinchtab
 ```
@@ -74,15 +68,9 @@ pinchtab nav https://github.com/pinchtab/pinchtab
 
 ```bash
 curl -s "$BASE/tabs" | jq .
-```
-
-```bash
 # CLI alternative
 pinchtab tabs
-```
-
-```jsonc
-// Response
+# Response
 {
   "tabs": [
     {
@@ -99,9 +87,6 @@ pinchtab tabs
 
 ```bash
 curl -s "$BASE/snapshot?filter=interactive" | jq .
-```
-
-```bash
 # CLI alternative (compact format)
 pinchtab snap -i -c
 ```
@@ -130,9 +115,6 @@ e14:button "Search or jump to…"
 
 ```bash
 curl -s "$BASE/text" | jq .
-```
-
-```bash
 # CLI alternative
 pinchtab text
 ```
@@ -160,9 +142,6 @@ Then click:
 curl -s -X POST "$BASE/action" \
   -H "Content-Type: application/json" \
   -d '{"kind":"click","ref":"e14"}' | jq .
-```
-
-```bash
 # CLI alternative (run snap first to cache refs)
 pinchtab snap -i > /dev/null
 pinchtab click e14
@@ -184,9 +163,6 @@ After clicking the search button (e14), a search input appears:
 
 ```bash
 curl -s "$BASE/snapshot?filter=interactive" | jq '.. | objects | select(.role == "combobox")' | head -10
-```
-
-```bash
 # CLI alternative
 pinchtab snap -i -c | grep combobox
 # Output: e221:combobox "Search" val="repo:pinchtab/pinchtab"
@@ -198,9 +174,6 @@ Type into it:
 curl -s -X POST "$BASE/action" \
   -H "Content-Type: application/json" \
   -d '{"kind":"type","ref":"e221","text":"browser automation"}' | jq .
-```
-
-```bash
 # CLI alternative
 pinchtab type e221 "browser automation"
 ```
@@ -221,9 +194,6 @@ pinchtab type e221 "browser automation"
 curl -s -X POST "$BASE/action" \
   -H "Content-Type: application/json" \
   -d '{"kind":"press","key":"Escape"}' | jq .
-```
-
-```bash
 # CLI alternative
 pinchtab press Escape
 ```
@@ -243,9 +213,6 @@ pinchtab press Escape
 ```bash
 curl -s "$BASE/screenshot" > smoke.jpg
 ls -lh smoke.jpg
-```
-
-```bash
 # CLI alternative
 pinchtab ss -o smoke.jpg
 ```
@@ -261,9 +228,6 @@ Saved smoke.jpg (55876 bytes)
 ```bash
 curl -s "$BASE/pdf" > smoke.pdf
 ls -lh smoke.pdf
-```
-
-```bash
 # CLI alternative
 pinchtab pdf -o smoke.pdf
 ```
@@ -336,9 +300,6 @@ curl -s -X POST "$BASE/tabs/$TAB/unlock" \
 curl -s -X POST "$BASE/tab" \
   -H "Content-Type: application/json" \
   -d '{"action":"new","url":"https://pinchtab.com"}' | jq .
-```
-
-```bash
 # CLI alternative
 pinchtab nav https://pinchtab.com
 ```

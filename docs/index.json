@@ -1,10 +1,18 @@
 {
   "main": [
-    "overview.md",
+    "pinchtab.md",
+    "showcase.md",
     "core-concepts.md",
     "headless-vs-headed.md",
     "dashboard.md",
     "get-started.md"
+  ],
+  "alternatives": [
+    "bridge.md",
+    "configuration.md",
+    "cli.md",
+    "api.md",
+    "troubleshooting.md"
   ],
   "references": [
     "references/api-structure.md",

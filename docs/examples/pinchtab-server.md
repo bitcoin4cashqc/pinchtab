@@ -1,18 +1,5 @@
 # Example: Server Smoke Test
 
-This example is a happy-path smoke test for a running `pinchtab server` (orchestrator mode) on `127.0.0.1:9867`.
-
-It is useful when you want to verify that the multi-instance orchestrator can:
-- respond to health checks
-- list and manage profiles
-- launch and stop instances
-- route requests to instances
-- use the `--instance` CLI flag
-
-For the server-mode mental model, see [Multi-Instance Guide](../guides/multi-instance.md).
-
-## Prerequisites
-
 Start the server:
 
 ```bash
@@ -32,15 +19,9 @@ The commands below assume `jq` is installed.
 
 ```bash
 curl -s "$BASE/health" | jq .
-```
-
-```bash
 # CLI alternative
 pinchtab health
-```
-
-```jsonc
-// Response
+# Response
 {
   "status": "ok",
   "mode": "dashboard"
@@ -51,15 +32,9 @@ pinchtab health
 
 ```bash
 curl -s "$BASE/profiles" | jq .
-```
-
-```bash
 # CLI alternative
 pinchtab profiles
-```
-
-```jsonc
-// Response
+# Response
 [
   {
     "id": "prof_967ae079",
@@ -76,15 +51,9 @@ pinchtab profiles
 
 ```bash
 curl -s "$BASE/instances" | jq .
-```
-
-```bash
 # CLI alternative
 pinchtab instances
-```
-
-```jsonc
-// Response (empty initially)
+# Response
 []
 ```
 
@@ -97,10 +66,7 @@ INST=$(curl -s -X POST "$BASE/instances/launch" \
   | jq -r '.id')
 
 echo "$INST"
-```
-
-```jsonc
-// Response
+# Response
 {
   "id": "inst_944a07ad",
   "profileId": "prof_910b1739",
@@ -119,10 +85,7 @@ echo "$INST"
 
 ```bash
 curl -s "$BASE/instances/$INST" | jq .
-```
-
-```jsonc
-// Response
+# Response
 {
   "id": "inst_944a07ad",
   "profileId": "prof_910b1739",
@@ -152,15 +115,9 @@ PORT=$(curl -s "$BASE/instances/$INST" | jq -r '.port')
 curl -s -X POST "http://127.0.0.1:$PORT/navigate" \
   -H "Content-Type: application/json" \
   -d '{"url":"https://github.com/pinchtab/pinchtab"}' | jq .
-```
-
-```bash
-# CLI alternative (uses --instance flag)
+# CLI alternative
 pinchtab nav --instance $INST https://github.com/pinchtab/pinchtab
-```
-
-```jsonc
-// Response
+# Response
 {
   "tabId": "E291F6815F61C58B0C9EA9129F960744",
   "title": "GitHub - pinchtab/pinchtab",
@@ -172,15 +129,9 @@ pinchtab nav --instance $INST https://github.com/pinchtab/pinchtab
 
 ```bash
 curl -s "$BASE/instances/$INST/tabs" | jq .
-```
-
-```bash
 # CLI alternative
 pinchtab tabs --instance $INST
-```
-
-```jsonc
-// Response
+# Response
 {
   "tabs": [
     {
@@ -197,16 +148,9 @@ pinchtab tabs --instance $INST
 
 ```bash
 curl -s "$BASE/instances/$INST/snapshot?filter=interactive" | jq '.nodes[:5]'
-```
-
-```bash
 # CLI alternative
 pinchtab snap -i -c --instance $INST
-```
-
-```bash
-# CLI output
-# GitHub - pinchtab/pinchtab | https://github.com/pinchtab/pinchtab | 144 nodes
+# Response
 e0:link "Skip to content"
 e1:link "GitHub Homepage"
 e2:link "pinchtab"
@@ -221,16 +165,10 @@ curl -s "$BASE/instances/$INST/snapshot?filter=interactive" > /dev/null
 curl -s -X POST "$BASE/instances/$INST/action" \
   -H "Content-Type: application/json" \
   -d '{"kind":"click","ref":"e5"}' | jq .
-```
-
-```bash
 # CLI alternative
 pinchtab snap -i --instance $INST > /dev/null
 pinchtab click e5 --instance $INST
-```
-
-```jsonc
-// Response
+# Response
 {
   "success": true,
   "result": {
@@ -244,15 +182,9 @@ pinchtab click e5 --instance $INST
 ```bash
 curl -s "$BASE/instances/$INST/screenshot" > screenshot.jpg
 ls -lh screenshot.jpg
-```
-
-```bash
 # CLI alternative
 pinchtab ss -o screenshot.jpg --instance $INST
-```
-
-```bash
-# Output
+# Response
 Saved screenshot.jpg (97376 bytes)
 ```
 
@@ -261,15 +193,9 @@ Saved screenshot.jpg (97376 bytes)
 ```bash
 curl -s "$BASE/instances/$INST/pdf" > page.pdf
 ls -lh page.pdf
-```
-
-```bash
 # CLI alternative
 pinchtab pdf -o page.pdf --instance $INST
-```
-
-```bash
-# Output
+# Response
 Saved page.pdf (1492879 bytes)
 ```
 
@@ -283,10 +209,7 @@ INST2=$(curl -s -X POST "$BASE/instances/launch" \
 
 echo "Instance 2: $INST2"
 curl -s "$BASE/instances" | jq '.[].profileName'
-```
-
-```jsonc
-// Response
+# Response
 "my-profile"
 "another-profile"
 ```
@@ -295,10 +218,7 @@ curl -s "$BASE/instances" | jq '.[].profileName'
 
 ```bash
 curl -s -X DELETE "$BASE/instances/$INST" | jq .
-```
-
-```jsonc
-// Response
+# Response
 {
   "stopped": true
 }
@@ -326,33 +246,3 @@ curl -s -X POST "$BASE/instances/attach" \
   "cdpUrl": "ws://localhost:9222/devtools/browser/..."
 }
 ```
-
-## CLI Quick Reference (Server Mode)
-
-| Action | CLI Command |
-|--------|-------------|
-| Health check | `pinchtab health` |
-| List profiles | `pinchtab profiles` |
-| List instances | `pinchtab instances` |
-| Navigate | `pinchtab nav <url> --instance <id>` |
-| Snapshot | `pinchtab snap -i -c --instance <id>` |
-| Click | `pinchtab click <ref> --instance <id>` |
-| Screenshot | `pinchtab ss -o file.jpg --instance <id>` |
-| PDF export | `pinchtab pdf -o file.pdf --instance <id>` |
-
-> **Tip:** Use `pinchtab instances` to get instance IDs, then use `--instance <id>` or `-I <id>` with other commands.
-
-## What This Example Proves
-
-If the full sequence works, your server/orchestrator can:
-- start and manage multiple Chrome instances
-- launch instances with different profiles
-- route requests to specific instances
-- proxy all bridge endpoints through the orchestrator
-- stop instances cleanly
-- optionally attach to external Chrome instances
-
-If this example fails, check:
-- the server is running on `127.0.0.1:9867`
-- Chrome can be started successfully
-- for attach: `attach.enabled: true` is set in config

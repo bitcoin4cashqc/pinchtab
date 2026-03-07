@@ -4,18 +4,18 @@ Welcome to PinchTab — browser control for AI agents, scripts, and automation w
 
 ## What is PinchTab?
 
-PinchTab is a **standalone HTTP server** that gives you direct control over Chrome. Any AI agent can use the CLI or HTTP API.
+PinchTab is a **standalone HTTP server** that gives you direct control over Chrome. Agents and automation tools can use it through the CLI or HTTP API.
 
 The main concept to understand first is that PinchTab has two runtime roles:
 
 - `pinchtab` or `pinchtab server` — the full control-plane server
 - `pinchtab bridge` — the single-instance bridge runtime
 
-The server is the normal entrypoint. It manages profiles, instances, routing, and the dashboard. The bridge runtime is the lightweight single-instance HTTP wrapper used for managed child instances.
+The server is the normal entrypoint. It manages profiles, instances, routing, security policy, and the dashboard. The bridge runtime is the lightweight single-instance HTTP wrapper used for managed child instances.
 
 That gives you a simple mental model:
 - start the **server**
-- create or attach **instances**
+- launch or attach **instances**
 - operate on **tabs**
 
 ## Primary Usage
@@ -31,8 +31,9 @@ In that model:
 - `pinchtab server` is the primary target
 - `pinchtab bridge` is an internal or advanced runtime detail
 
-**CLI example:**
-```bash
+**CLI example** (assuming a running default instance or server-managed shorthand path):
+
+```bash **cli**
 # Navigate
 pinchtab nav https://pinchtab.com
 
@@ -43,8 +44,7 @@ pinchtab snap -i -c
 pinchtab click e5
 ```
 
-**HTTP example (realistic flow):**
-```bash
+```bash **curl**
 # 1. Create an instance
 INST=$(curl -s -X POST http://localhost:9867/instances/launch \
   -H "Content-Type: application/json" \
@@ -71,10 +71,10 @@ curl -s -X POST http://localhost:9867/tabs/$TAB/action \
 - **Server-first** — The default process is the control-plane server, not a raw browser wrapper
 - **Bridge-backed instances** — Managed instances run as isolated bridge runtimes behind the server
 - **Tab-Centric** — Everything revolves around tabs, not URLs
-- **Stateful** — Sessions persist between requests. Log in once, stay logged in across restarts
+- **Stateful** — Profile can be managed and persisted between requests. Log in once, stay logged in across restarts
 - **Token Inexpensive** — Text extraction at 800 tokens/page (5-13x cheaper than full snapshots)
 - **Flexible Modes** — Launch headed or headless browsers, keep persistent profiles, or attach to external Chrome when allowed
-- **Monitoring & Control** — Tab locking for multi-agent safety, stealth mode for bot detection bypass
+- **Security & Control** — Optional IDPI protections, tab locking for multi-agent safety, and per-process health/metrics endpoints
 
 ---
 
@@ -97,6 +97,7 @@ If you are moving beyond the primary server-first workflow, use the expert guide
 - [Bridge Mode](guides/expert-bridge-mode.md) — run the single-instance runtime directly
 - [Attach](guides/expert-attach.md) — register externally managed Chrome instances
 - [Multi-Instance Strategies](guides/expert-strategies.md) — advanced routing and allocation behavior
+- [Architecture](architecture/pinchtab-architecture.md) — server, bridge, attach, and execution model
 
 ---
 
