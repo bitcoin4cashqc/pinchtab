@@ -36,9 +36,6 @@
     "guides/data-storage.md",
     "guides/raspberry-pi.md"
   ],
-  "examples": [
-    "examples/bridge-smoke-test.md"
-  ],
   "proposals": [
     "proposals/default-instance.md",
     "proposals/performance-optimization.md",
